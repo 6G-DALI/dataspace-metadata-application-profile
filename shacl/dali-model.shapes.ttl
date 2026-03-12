@@ -1,0 +1,358 @@
+# 6G-DALI SHACL Shapes — ML Model (MLDCAT-AP)
+# Defines validation shapes for mldcat:MLModel resources representing
+# models trained by MLOps pipelines and registered in the 6G-DALI Data Space.
+#
+# ML models are registered as both dcat:Dataset and mldcat:MLModel.
+# This shape targets mldcat:MLModel and covers MLDCAT-AP properties,
+# training provenance, performance metrics via DQV, and 6G-DALI extensions.
+#
+# Severity levels:
+#   sh:Violation  — Mandatory (M)
+#   sh:Warning    — Recommended (R)
+
+PREFIX adms:   <http://www.w3.org/ns/adms#>
+PREFIX dcat:   <http://www.w3.org/ns/dcat#>
+PREFIX dct:    <http://purl.org/dc/terms/>
+PREFIX dqv:    <http://www.w3.org/ns/dqv#>
+PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX mldcat: <http://www.w3.org/ns/mldcat#>
+PREFIX prov:   <http://www.w3.org/ns/prov#>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+PREFIX sh:     <http://www.w3.org/ns/shacl#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX dali:   <https://dali-project.eu/ns#>
+
+# ---------------------------------------------------------------------------
+# dali:MLModelShape
+# Node shape for mldcat:MLModel resources in the 6G-DALI Data Space.
+# ---------------------------------------------------------------------------
+
+dali:MLModelShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI ML Model" ;
+    sh:description "Shape for mldcat:MLModel resources produced by MLOps pipelines in the 6G-DALI Data Space." ;
+    sh:targetClass  mldcat:MLModel ;
+
+    # --- Mandatory: Core DCAT-AP identity (inherited from dcat:Dataset) ---
+
+    sh:property [
+        sh:path         dct:title ;
+        sh:name         "Title" ;
+        sh:minCount     1 ;
+        sh:datatype     rdf:langString ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:title is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:description ;
+        sh:name         "Description" ;
+        sh:minCount     1 ;
+        sh:datatype     rdf:langString ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:description is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:identifier ;
+        sh:name         "Identifier" ;
+        sh:minCount     1 ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:identifier is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:issued ;
+        sh:name         "Issued date" ;
+        sh:minCount     1 ;
+        sh:or (
+            [ sh:datatype xsd:date ]
+            [ sh:datatype xsd:dateTime ]
+        ) ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:issued is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:license ;
+        sh:name         "License" ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:license is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:accessRights ;
+        sh:name         "Access rights" ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:accessRights is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:publisher ;
+        sh:name         "Publisher" ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:publisher is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         adms:version ;
+        sh:name         "Version" ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Violation ;
+        sh:message      "adms:version is mandatory for ML models (semantic version recommended, e.g., '1.0.0')."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:distribution ;
+        sh:name         "Distribution" ;
+        sh:description  "Model artefact distribution (weights file, ONNX, container image, etc.)." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dcat:distribution is mandatory for ML models (must reference the model artefact)."@en ;
+    ] ;
+
+    # --- Mandatory: MLDCAT-AP specific ---
+
+    sh:property [
+        sh:path         mldcat:mlModelType ;
+        sh:name         "ML model type" ;
+        sh:description  "Algorithm family of the model." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:string ;
+        sh:in           ( "Classification"
+                          "Regression"
+                          "Clustering"
+                          "Reinforcement Learning"
+                          "Federated Learning"
+                          "Generative"
+                          "Anomaly Detection"
+                          "Other" ) ;
+        sh:severity     sh:Violation ;
+        sh:message      "mldcat:mlModelType is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         mldcat:mlTask ;
+        sh:name         "ML task" ;
+        sh:description  "Specific task the model performs (e.g., 'Localization', 'Beamforming Prediction')." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Violation ;
+        sh:message      "mldcat:mlTask is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         mldcat:trainedOn ;
+        sh:name         "Trained on" ;
+        sh:description  "Reference to the dcat:Dataset used for training." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:class        dcat:Dataset ;
+        sh:severity     sh:Violation ;
+        sh:message      "mldcat:trainedOn is mandatory and must reference a dcat:Dataset IRI."@en ;
+    ] ;
+
+    # --- Recommended: MLDCAT-AP specific ---
+
+    sh:property [
+        sh:path         mldcat:evaluatedOn ;
+        sh:name         "Evaluated on" ;
+        sh:description  "Reference to the dcat:Dataset used for evaluation/testing." ;
+        sh:nodeKind     sh:IRI ;
+        sh:class        dcat:Dataset ;
+        sh:severity     sh:Warning ;
+        sh:message      "mldcat:evaluatedOn is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         mldcat:mlFramework ;
+        sh:name         "ML framework" ;
+        sh:datatype     xsd:string ;
+        sh:in           ( "TensorFlow" "PyTorch" "scikit-learn" "Keras"
+                          "JAX" "MXNet" "ONNX Runtime" "Other" ) ;
+        sh:severity     sh:Warning ;
+        sh:message      "mldcat:mlFramework is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         mldcat:mlFrameworkVersion ;
+        sh:name         "ML framework version" ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "mldcat:mlFrameworkVersion is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         mldcat:inputFeatures ;
+        sh:name         "Input features" ;
+        sh:description  "Description or schema of the model input features." ;
+        sh:datatype     rdf:langString ;
+        sh:severity     sh:Warning ;
+        sh:message      "mldcat:inputFeatures is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         mldcat:outputFeatures ;
+        sh:name         "Output features" ;
+        sh:description  "Description or schema of the model outputs." ;
+        sh:datatype     rdf:langString ;
+        sh:severity     sh:Warning ;
+        sh:message      "mldcat:outputFeatures is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         mldcat:hyperparameters ;
+        sh:name         "Hyperparameters" ;
+        sh:description  "Key training hyperparameters as a JSON string literal." ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "mldcat:hyperparameters is recommended."@en ;
+    ] ;
+
+    # --- Recommended: Provenance ---
+
+    sh:property [
+        sh:path         prov:wasDerivedFrom ;
+        sh:name         "Was derived from" ;
+        sh:description  "Source dataset(s) the model was trained on." ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "prov:wasDerivedFrom is recommended to link to the training dataset."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         prov:wasGeneratedBy ;
+        sh:name         "Was generated by" ;
+        sh:description  "Reference to the MLOps training prov:Activity." ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "prov:wasGeneratedBy is recommended."@en ;
+    ] ;
+
+    # --- Recommended: Training infrastructure ---
+
+    sh:property [
+        sh:path         dali:trainingSplit ;
+        sh:name         "Training split" ;
+        sh:description  "Fraction of the dataset used for training (0.0–1.0)." ;
+        sh:datatype     xsd:decimal ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 1.0 ;
+        sh:severity     sh:Warning ;
+        sh:message      "dali:trainingSplit is recommended (value between 0.0 and 1.0)."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:trainingHardware ;
+        sh:name         "Training hardware" ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "dali:trainingHardware is recommended (e.g., 'NVIDIA A100 GPU')."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:trainingComputeEnv ;
+        sh:name         "Training compute environment" ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "dali:trainingComputeEnv is recommended (e.g., 'Kubernetes cluster')."@en ;
+    ] ;
+
+    # --- Recommended: Performance metrics ---
+
+    sh:property [
+        sh:path         dqv:hasQualityMeasurement ;
+        sh:name         "Performance measurement" ;
+        sh:description  "At least one DQV quality measurement expressing a model performance metric." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dqv:hasQualityMeasurement is recommended for ML models (use to record performance metrics)."@en ;
+    ] ;
+
+    # --- Recommended: Contacts & discovery ---
+
+    sh:property [
+        sh:path         dct:creator ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dct:creator is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:contactPoint ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:contactPoint is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:keyword ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:keyword is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:theme ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:theme is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:landingPage ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:landingPage is recommended (model card page)."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         schema:codeRepository ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "schema:codeRepository is recommended (training code repository)."@en ;
+    ] .
+
+
+# ---------------------------------------------------------------------------
+# dali:MLModelDistributionShape
+# Additional constraints on dcat:Distribution when used for model artefacts.
+# Applied when the distribution is linked from an mldcat:MLModel.
+# ---------------------------------------------------------------------------
+
+dali:MLModelDistributionShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI ML Model Distribution" ;
+    sh:description "Shape for dcat:Distribution resources that represent ML model artefact files." ;
+
+    # Inherits from dali:DistributionShape; adds model-specific media type guidance.
+    # Typical model media types: application/onnx, application/zip (TF SavedModel),
+    # application/octet-stream (.pt/.pth), application/xml (PMML),
+    # application/vnd.oci.image.manifest.v1+json (container image).
+
+    sh:property [
+        sh:path     dcat:mediaType ;
+        sh:name     "Model media type" ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message  "dcat:mediaType is mandatory on ML model distributions."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dcat:byteSize ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message  "dcat:byteSize is recommended on ML model distributions."@en ;
+    ] .

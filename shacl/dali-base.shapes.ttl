@@ -1,0 +1,599 @@
+# 6G-DALI SHACL Shapes — Dataset and Testbed Context
+# Extends DCAT-AP 3.0 shapes with mandatory dali: properties for dcat:Dataset
+# and defines the dali:TestbedContext node shape covering SNS-JU CMT fields.
+#
+# Severity levels:
+#   sh:Violation  — Mandatory (M): record will be rejected without this field
+#   sh:Warning    — Recommended (R): record accepted but flagged as incomplete
+
+PREFIX adms:   <http://www.w3.org/ns/adms#>
+PREFIX dcat:   <http://www.w3.org/ns/dcat#>
+PREFIX dct:    <http://purl.org/dc/terms/>
+PREFIX dqv:    <http://www.w3.org/ns/dqv#>
+PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX gax:    <https://registry.lab.gaia-x.eu/v1/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#>
+PREFIX prov:   <http://www.w3.org/ns/prov#>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+PREFIX sh:     <http://www.w3.org/ns/shacl#>
+PREFIX skos:   <http://www.w3.org/2004/02/skos/core#>
+PREFIX vcard:  <http://www.w3.org/2006/vcard/ns#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX dali:   <https://dali-project.eu/ns#>
+
+# ---------------------------------------------------------------------------
+# dali:DatasetShape
+# Node shape for dcat:Dataset resources in the 6G-DALI Data Space.
+# ---------------------------------------------------------------------------
+
+dali:DatasetShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI Dataset" ;
+    sh:description "Shape for dcat:Dataset resources produced by 5G/6G testbeds or DataOps pipelines in the 6G-DALI Data Space." ;
+    sh:targetClass  dcat:Dataset ;
+
+    # --- Mandatory: Core identity ---
+
+    sh:property [
+        sh:path         dct:title ;
+        sh:name         "Title" ;
+        sh:description  "Human-readable name of the dataset. Must include at least one English language-tagged literal." ;
+        sh:minCount     1 ;
+        sh:datatype     rdf:langString ;
+        sh:languageIn   ( "en" ) ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:title is mandatory and must have an English language tag."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:description ;
+        sh:name         "Description" ;
+        sh:description  "Free-text description of the dataset content." ;
+        sh:minCount     1 ;
+        sh:datatype     rdf:langString ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:description is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:identifier ;
+        sh:name         "Identifier" ;
+        sh:description  "Unique identifier (UUID, DOI, or accession number)." ;
+        sh:minCount     1 ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:identifier is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:issued ;
+        sh:name         "Issued date" ;
+        sh:description  "Date the dataset was first published." ;
+        sh:minCount     1 ;
+        sh:or (
+            [ sh:datatype xsd:date ]
+            [ sh:datatype xsd:dateTime ]
+        ) ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:issued is mandatory and must be an xsd:date or xsd:dateTime."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:license ;
+        sh:name         "License" ;
+        sh:description  "License URI (e.g., CC-BY-4.0)." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:license is mandatory and must be an IRI."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:accessRights ;
+        sh:name         "Access rights" ;
+        sh:description  "Access condition using the EU Access Right vocabulary." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:accessRights is mandatory and must reference an EU Access Right vocabulary IRI."@en ;
+    ] ;
+
+    # --- Mandatory: 6G-DALI specific ---
+
+    sh:property [
+        sh:path         dali:snsProjectName ;
+        sh:name         "SNS Project Name" ;
+        sh:description  "Name of the SNS-JU project that produced this dataset (e.g., '6G-DALI')." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Violation ;
+        sh:message      "dali:snsProjectName is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:gdprCompliant ;
+        sh:name         "GDPR compliance statement" ;
+        sh:description  "Boolean confirming the dataset owner's GDPR compliance declaration." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:boolean ;
+        sh:severity     sh:Violation ;
+        sh:message      "dali:gdprCompliant is mandatory."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:fairCompliant ;
+        sh:name         "FAIR compliance statement" ;
+        sh:description  "Boolean confirming the dataset conforms to the FAIR principles." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:boolean ;
+        sh:severity     sh:Violation ;
+        sh:message      "dali:fairCompliant is mandatory."@en ;
+    ] ;
+
+    # --- Recommended: Provenance & attribution ---
+
+    sh:property [
+        sh:path         dct:publisher ;
+        sh:name         "Publisher" ;
+        sh:description  "Organisation responsible for making the dataset available." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dct:publisher is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:creator ;
+        sh:name         "Creator" ;
+        sh:description  "Person or organisation that created the dataset." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dct:creator is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:contactPoint ;
+        sh:name         "Contact point" ;
+        sh:description  "Contact information for the dataset." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:contactPoint is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         adms:version ;
+        sh:name         "Version" ;
+        sh:description  "Version label of the dataset." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "adms:version is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:conformsTo ;
+        sh:name         "Conforms to" ;
+        sh:description  "Standard or specification the dataset conforms to. Must include FAIR Principles URI." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dct:conformsTo is recommended; include https://www.go-fair.org/fair-principles/."@en ;
+    ] ;
+
+    # --- Recommended: Categorisation ---
+
+    sh:property [
+        sh:path         dcat:theme ;
+        sh:name         "Theme" ;
+        sh:description  "Category from the EU Data Theme controlled vocabulary." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:theme is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:keyword ;
+        sh:name         "Keyword" ;
+        sh:description  "Free keyword tags with language tags." ;
+        sh:minCount     1 ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:keyword is recommended."@en ;
+    ] ;
+
+    # --- Recommended: Temporal & spatial ---
+
+    sh:property [
+        sh:path         dct:temporal ;
+        sh:name         "Temporal coverage" ;
+        sh:description  "Time period covered by the dataset." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dct:temporal is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:spatial ;
+        sh:name         "Spatial coverage" ;
+        sh:description  "Geographic area covered by the dataset." ;
+        sh:minCount     1 ;
+        sh:severity     sh:Warning ;
+        sh:message      "dct:spatial is recommended."@en ;
+    ] ;
+
+    # --- Recommended: Distribution ---
+
+    sh:property [
+        sh:path         dcat:distribution ;
+        sh:name         "Distribution" ;
+        sh:description  "At least one distribution providing access to the dataset." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:distribution is recommended."@en ;
+    ] ;
+
+    # --- Recommended: Testbed context ---
+
+    sh:property [
+        sh:path         dali:testbedContext ;
+        sh:name         "Testbed context" ;
+        sh:description  "5G/6G testbed and experiment parameters following the SNS-JU CMT template." ;
+        sh:minCount     1 ;
+        sh:node         dali:TestbedContextShape ;
+        sh:severity     sh:Warning ;
+        sh:message      "dali:testbedContext is recommended for datasets produced by 5G/6G testbeds."@en ;
+    ] ;
+
+    # --- Recommended: Quality ---
+
+    sh:property [
+        sh:path         dqv:hasQualityMeasurement ;
+        sh:name         "Quality measurement" ;
+        sh:description  "Link to at least one DQV quality measurement for this dataset." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dqv:hasQualityMeasurement is recommended."@en ;
+    ] ;
+
+    # --- Recommended: GAIA-X ---
+
+    sh:property [
+        sh:path         gax:containsPII ;
+        sh:name         "Contains PII" ;
+        sh:description  "Boolean declaring whether the dataset contains Personally Identifiable Information." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:boolean ;
+        sh:severity     sh:Warning ;
+        sh:message      "gax:containsPII is recommended for GAIA-X compliance."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         gax:producedBy ;
+        sh:name         "Produced by" ;
+        sh:description  "Reference to the GAIA-X legal participant that produced the dataset." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "gax:producedBy is recommended for GAIA-X compliance."@en ;
+    ] .
+
+
+# ---------------------------------------------------------------------------
+# dali:DistributionShape
+# Node shape for dcat:Distribution resources.
+# ---------------------------------------------------------------------------
+
+dali:DistributionShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI Distribution" ;
+    sh:targetClass  dcat:Distribution ;
+
+    sh:property [
+        sh:path     dct:title ;
+        sh:minCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:severity sh:Violation ;
+        sh:message  "dct:title is mandatory on dcat:Distribution."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dcat:accessURL ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Violation ;
+        sh:message  "dcat:accessURL is mandatory on dcat:Distribution."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dct:license ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Violation ;
+        sh:message  "dct:license is mandatory on dcat:Distribution."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dct:format ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Warning ;
+        sh:message  "dct:format is recommended on dcat:Distribution."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dcat:mediaType ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+        sh:message  "dcat:mediaType is recommended on dcat:Distribution."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dcat:byteSize ;
+        sh:minCount 1 ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:severity sh:Warning ;
+        sh:message  "dcat:byteSize is recommended on dcat:Distribution."@en ;
+    ] .
+
+
+# ---------------------------------------------------------------------------
+# dali:TestbedContextShape
+# Node shape for dali:TestbedContext blank nodes / named resources.
+# Covers SNS-JU CMT groups 3A (infrastructure), 3B (service), 3C (metrics).
+# ---------------------------------------------------------------------------
+
+dali:TestbedContextShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI Testbed Context" ;
+    sh:description "Shape for dali:TestbedContext resources encoding SNS-JU CMT 5G/6G infrastructure and experiment metadata." ;
+    sh:targetClass  dali:TestbedContext ;
+
+    # --- CMT Group 3A: Underlay Network & Compute ---
+
+    sh:property [
+        sh:path     dali:environment ;
+        sh:name     "Environment" ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in       ( "indoors" "urban" "rural" "mixed" ) ;
+        sh:severity sh:Violation ;
+        sh:message  "dali:environment is mandatory. Allowed values: indoors, urban, rural, mixed."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:networkDomain ;
+        sh:name     "Network domain" ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:in       ( "RAN" "Transport" "CORE" "E2E" ) ;
+        sh:severity sh:Violation ;
+        sh:message  "dali:networkDomain is mandatory. Allowed values: RAN, Transport, CORE, E2E."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:underlayPlatform ;
+        sh:name     "Underlay platform" ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Warning ;
+        sh:message  "dali:underlayPlatform is recommended (URI reference to the testbed platform)."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:computeInfrastructureType ;
+        sh:name     "Compute infrastructure type" ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+        sh:message  "dali:computeInfrastructureType is recommended."@en ;
+    ] ;
+
+    # RAN-focused properties
+
+    sh:property [
+        sh:path     dali:ran3gppRelease ;
+        sh:name     "RAN 3GPP Release" ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+        sh:message  "dali:ran3gppRelease is recommended for RAN datasets (e.g., 'Release 17')."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranNewRadioType ;
+        sh:name     "New Radio Type" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "NR-SA" "NR-NSA" "LTE" "NR-SA/NR-NSA" ) ;
+        sh:severity sh:Warning ;
+        sh:message  "dali:ranNewRadioType: allowed values: NR-SA, NR-NSA, LTE."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranSplit ;
+        sh:name     "RAN split" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "DU-RU split" "No-Split" "CU-DU split" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranFocusedTechnology ;
+        sh:name     "RAN focused technology" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "O-RAN" "JSAC" "RIC" "No_focus" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranCoverageType ;
+        sh:name     "Coverage type" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "Single_Macro" "Single_Micro" "Multicell_setup" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranFrequencyBand ;
+        sh:name     "RAN frequency band" ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+        sh:message  "dali:ranFrequencyBand is recommended (e.g., 'n78', '3.5GHz')."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranBandwidthMHz ;
+        sh:name     "RAN bandwidth (MHz)" ;
+        sh:datatype xsd:integer ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranMaxEndDevices ;
+        sh:name     "Max end devices" ;
+        sh:datatype xsd:integer ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:ranMobilityModel ;
+        sh:name     "End device mobility model" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "static" "pedestrian" "vehicular" "UAV" "mixed" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    # Core-focused properties
+
+    sh:property [
+        sh:path     dali:coreRelease ;
+        sh:name     "Core 3GPP release" ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:coreSolution ;
+        sh:name     "Core solution type" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "OpenSource" "Commercial" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    # Transport-focused properties
+
+    sh:property [
+        sh:path     dali:transportType ;
+        sh:name     "Transport type" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "wired" "microwave" "fiber_optics" "satellite" "mixed" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    # Compute-focused properties
+
+    sh:property [
+        sh:path     dali:computeOrchestratorType ;
+        sh:name     "Compute orchestrator" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "Kubernetes" "OpenStack" "openSlice" "ONAP" "OSM" "None" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:computeGpuUse ;
+        sh:name     "GPU use" ;
+        sh:datatype xsd:boolean ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:computeVirtualizationType ;
+        sh:name     "Virtualisation type" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "KVM" "Docker" "Bare-metal" "mixed" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    # --- CMT Group 3B: Service description ---
+
+    sh:property [
+        sh:path     dali:trafficOrigin ;
+        sh:name     "Traffic origin" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "Manual" "Application" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:trafficPattern ;
+        sh:name     "Traffic pattern" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "UL/DL UDP" "UL/DL TCP" "UL/DL MPTCP"
+                      "DL UDP" "DL TCP" "DL MPTCP"
+                      "UL UDP" "UL TCP" "UL MPTCP" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:sliceType ;
+        sh:name     "Slice type" ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:referencePlane ;
+        sh:name     "Reference plane" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "control plane" "data plane" "management plane" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:relatedVertical ;
+        sh:name     "Related vertical" ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    # --- CMT Group 3C: Experimentation process & metrics ---
+
+    sh:property [
+        sh:path     dali:observationPointHorizontal ;
+        sh:name     "Observation point (horizontal)" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "E2E Application layer"
+                      "End device to Access"
+                      "DU to CU"
+                      "Access to Edge"
+                      "Access to Core"
+                      "Core to Cloud" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:observationPointVertical ;
+        sh:name     "Observation point (vertical)" ;
+        sh:datatype xsd:string ;
+        sh:in       ( "Radio Level" "Network Layer" "Application Layer"
+                      "Compute Resource-level" "cross-layer" "other" ) ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:measurementFamily ;
+        sh:name     "Measurement family (3GPP TS 28.552)" ;
+        sh:description "3GPP TS 28.552 measurement family code (e.g., DRB, RRU, L1M, PEE)." ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:measurementTool ;
+        sh:name     "Measurement tool" ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+    ] .

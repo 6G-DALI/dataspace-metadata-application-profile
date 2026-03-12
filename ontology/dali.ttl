@@ -1,0 +1,857 @@
+# =============================================================================
+# 6G-DALI Ontology
+# Namespace: https://dali-project.eu/ns#
+# Prefix:    dali:
+#
+# Defines all custom classes, properties, controlled vocabularies (as SKOS
+# concept schemes), and named DQV dimensions/metrics introduced by the
+# 6G-DALI Metadata Application Profile.
+#
+# This ontology extends:
+#   - DCAT-AP 3.0    (dcat:, dct:)
+#   - MLDCAT-AP      (mldcat:)
+#   - W3C DQV        (dqv:)
+#   - W3C PROV-O     (prov:)
+#   - GAIA-X TF      (gax:)
+#   - SNS-JU CMT V1.0
+# =============================================================================
+
+PREFIX dali:    <https://dali-project.eu/ns#>
+PREFIX dcat:    <http://www.w3.org/ns/dcat#>
+PREFIX dct:     <http://purl.org/dc/terms/>
+PREFIX dqv:     <http://www.w3.org/ns/dqv#>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX mldcat:  <http://www.w3.org/ns/mldcat#>
+PREFIX owl:     <http://www.w3.org/2002/07/owl#>
+PREFIX prov:    <http://www.w3.org/ns/prov#>
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX vann:    <http://purl.org/vocab/vann/>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+
+
+# =============================================================================
+# Ontology declaration
+# =============================================================================
+
+<https://dali-project.eu/ns>
+    rdf:type            owl:Ontology ;
+    dct:title           "6G-DALI Metadata Application Profile Ontology"@en ;
+    dct:description     "Defines classes, properties, controlled vocabularies, and quality dimensions/metrics for the 6G-DALI Data Space Metadata Application Profile. Covers 5G/6G testbed context (SNS-JU CMT), DataOps service descriptions, MLOps model descriptions (MLDCAT-AP extensions), and W3C DQV quality annotations."@en ;
+    dct:created         "2026-03-13"^^xsd:date ;
+    dct:modified        "2026-03-13"^^xsd:date ;
+    owl:versionInfo     "1.0" ;
+    dct:creator         [ rdf:type  foaf:Organization ;
+                          foaf:name "6G-DALI Consortium" ;
+                          foaf:homepage <https://dali-project.eu> ] ;
+    dct:license         <https://creativecommons.org/licenses/by/4.0/> ;
+    vann:preferredNamespacePrefix "dali" ;
+    vann:preferredNamespaceUri    "https://dali-project.eu/ns#" ;
+    rdfs:seeAlso        <https://dataspace.6gdali.eu/catalogue> .
+
+
+# =============================================================================
+# 1. CLASSES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# dali:TestbedContext
+# Encapsulates the 5G/6G infrastructure and experiment parameters
+# described in the SNS-JU Common Metadata Template (CMT) groups 3A, 3B, 3C.
+# -----------------------------------------------------------------------------
+
+dali:TestbedContext
+    rdf:type            owl:Class ;
+    rdfs:label          "Testbed Context"@en ;
+    rdfs:comment        "A structured description of the 5G/6G testbed infrastructure, service configuration, and experimentation parameters associated with a dataset, following the SNS-JU Common Metadata Template (CMT) V1.0."@en ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> ;
+    rdfs:seeAlso        <https://bscw.sns-ju.eu/sec/bscw.cgi/606978> .
+
+
+# =============================================================================
+# 2. OBJECT PROPERTIES
+# =============================================================================
+
+dali:testbedContext
+    rdf:type            owl:ObjectProperty ;
+    rdfs:label          "testbed context"@en ;
+    rdfs:comment        "Links a dcat:Dataset to a dali:TestbedContext resource describing the 5G/6G testbed and experiment conditions under which the dataset was produced."@en ;
+    rdfs:domain         dcat:Dataset ;
+    rdfs:range          dali:TestbedContext ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:underlayPlatform
+    rdf:type            owl:ObjectProperty ;
+    rdfs:label          "underlay platform"@en ;
+    rdfs:comment        "Reference URI to the testbed platform used to collect the data (e.g., link to Victoria Network UMA/ITIS, 5TONIC, etc.)."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 3. DATATYPE PROPERTIES — Dataset level
+# =============================================================================
+
+dali:snsProjectName
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "SNS project name"@en ;
+    rdfs:comment        "Name of the SNS-JU project that produced this dataset (e.g., '6G-DALI', 'FIDAL', '6G-SANDBOX')."@en ;
+    rdfs:domain         dcat:Dataset ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:gdprCompliant
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "GDPR compliant"@en ;
+    rdfs:comment        "Boolean declaration by the dataset owner confirming that the dataset complies with GDPR requirements."@en ;
+    rdfs:domain         dcat:Dataset ;
+    rdfs:range          xsd:boolean ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:fairCompliant
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "FAIR compliant"@en ;
+    rdfs:comment        "Boolean declaration by the dataset owner confirming that the dataset adheres to the FAIR (Findable, Accessible, Interoperable, Reusable) principles."@en ;
+    rdfs:domain         dcat:Dataset ;
+    rdfs:range          xsd:boolean ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 4. DATATYPE PROPERTIES — TestbedContext: CMT Group 3A (Infrastructure)
+# =============================================================================
+
+dali:environment
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "environment"@en ;
+    rdfs:comment        "Physical environment in which the measurements were collected. Allowed values: indoors, urban, rural, mixed."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:EnvironmentScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:networkDomain
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "network domain"@en ;
+    rdfs:comment        "The network infrastructure domain(s) involved. Allowed values: RAN, Transport, CORE, E2E."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:NetworkDomainScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:computeInfrastructureType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "compute infrastructure type"@en ;
+    rdfs:comment        "Type of compute infrastructure used (e.g., 'private-edge node', 'central cloud')."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+# --- RAN properties ---
+
+dali:ran3gppRelease
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "RAN 3GPP release"@en ;
+    rdfs:comment        "3GPP release of the RAN deployment (e.g., 'Release 17')."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranNewRadioType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "new radio type"@en ;
+    rdfs:comment        "New Radio deployment type. Allowed values: NR-SA, NR-NSA, LTE."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:NRTypeScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranSplit
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "RAN split"@en ;
+    rdfs:comment        "Functional split used in the RAN deployment. Allowed values: DU-RU split, No-Split, CU-DU split."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:RANSplitScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranFocusedTechnology
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "RAN focused technology"@en ;
+    rdfs:comment        "Primary technology focus of the RAN deployment. Allowed values: O-RAN, JSAC, RIC, No_focus."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:RANTechnologyScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranCoverageType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "coverage type"@en ;
+    rdfs:comment        "RAN coverage configuration. Allowed values: Single_Macro, Single_Micro, Multicell_setup."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:CoverageTypeScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranFrequencyBand
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "RAN frequency band"@en ;
+    rdfs:comment        "Frequency band used (e.g., 'n78', '3.5GHz', '2.61GHz')."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranBandwidthMHz
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "RAN bandwidth (MHz)"@en ;
+    rdfs:comment        "Channel bandwidth in MHz."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:integer ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranMaxEndDevices
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "max end devices"@en ;
+    rdfs:comment        "Maximum number of end devices (UEs) involved in the experiment."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:integer ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:ranMobilityModel
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "end device mobility model"@en ;
+    rdfs:comment        "Mobility model of the end devices. Allowed values: static, pedestrian, vehicular, UAV, mixed."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:MobilityModelScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+# --- Core properties ---
+
+dali:coreRelease
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "core 3GPP release"@en ;
+    rdfs:comment        "3GPP release of the network core deployment (e.g., 'Release 17')."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:coreSolution
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "core solution"@en ;
+    rdfs:comment        "Type of network core solution. Allowed values: OpenSource, Commercial."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:CoreSolutionScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+# --- Transport properties ---
+
+dali:transportType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "transport type"@en ;
+    rdfs:comment        "Type of transport network. Allowed values: wired, microwave, fiber_optics, satellite, mixed."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:TransportTypeScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+# --- Compute properties ---
+
+dali:computeOrchestratorType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "compute orchestrator type"@en ;
+    rdfs:comment        "Orchestration platform used. Allowed values: Kubernetes, OpenStack, openSlice, ONAP, OSM, None."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:OrchestratorScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:computeGpuUse
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "GPU use"@en ;
+    rdfs:comment        "Boolean indicating whether GPUs were used in the compute environment."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:boolean ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:computeVirtualizationType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "virtualisation type"@en ;
+    rdfs:comment        "Virtualisation technology used. Allowed values: KVM, Docker, Bare-metal, mixed."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:VirtualizationScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 5. DATATYPE PROPERTIES — TestbedContext: CMT Group 3B (Service description)
+# =============================================================================
+
+dali:trafficOrigin
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "traffic origin"@en ;
+    rdfs:comment        "Origin of the traffic in the experiment. Allowed values: Manual, Application."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:TrafficOriginScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:trafficPattern
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "traffic pattern"@en ;
+    rdfs:comment        "Traffic direction and protocol pattern (e.g., 'DL UDP', 'UL/DL TCP')."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:TrafficPatternScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:sliceType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "slice type"@en ;
+    rdfs:comment        "Network slice type used in the experiment (e.g., 'slice101', 'Multi-slice', 'No_slicing')."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:referencePlane
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "reference plane"@en ;
+    rdfs:comment        "Network plane where measurements were collected. Allowed values: control plane, data plane, management plane."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:ReferencePlaneScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:relatedVertical
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "related vertical"@en ;
+    rdfs:comment        "Industry vertical related to the experiment (e.g., 'Vertical_agnostic', 'CAM', 'HEALTH')."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 6. DATATYPE PROPERTIES — TestbedContext: CMT Group 3C (Experimentation metrics)
+# =============================================================================
+
+dali:observationPointHorizontal
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "observation point (horizontal)"@en ;
+    rdfs:comment        "Horizontal observation point in the 5G architecture (per SNS-JU CMT Annex 1). Allowed values: E2E Application layer, End device to Access, DU to CU, Access to Edge, Access to Core, Core to Cloud."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:ObservationPointHScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:observationPointVertical
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "observation point (vertical)"@en ;
+    rdfs:comment        "Vertical observation layer in the protocol stack. Allowed values: Radio Level, Network Layer, Application Layer, Compute Resource-level, cross-layer, other."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:ObservationPointVScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:measurementFamily
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "measurement family"@en ;
+    rdfs:comment        "3GPP TS 28.552 measurement family code (e.g., DRB, RRU, L1M, PEE, QF). Multiple values allowed."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:measurementTool
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "measurement tool"@en ;
+    rdfs:comment        "Tool or software used to collect the measurements (e.g., 'tcpdump', 'Prometheus exporter'). Multiple values allowed."@en ;
+    rdfs:domain         dali:TestbedContext ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 7. DATATYPE PROPERTIES — DataService
+# =============================================================================
+
+dali:serviceType
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "service type"@en ;
+    rdfs:comment        "Nature of the DataOps service. Allowed values: Transformation, QualityCheck, Augmentation, Aggregation, Anonymisation, Feature Engineering."@en ;
+    rdfs:domain         dcat:DataService ;
+    rdfs:range          xsd:string ;
+    rdfs:seeAlso        dali:ServiceTypeScheme ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:inputFormat
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "input format"@en ;
+    rdfs:comment        "Expected IANA media type of input data consumed by the service (e.g., 'text/csv')."@en ;
+    rdfs:domain         dcat:DataService ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:outputFormat
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "output format"@en ;
+    rdfs:comment        "Produced IANA media type of output data from the service."@en ;
+    rdfs:domain         dcat:DataService ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:framework
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "processing framework"@en ;
+    rdfs:comment        "Software framework used by the data service (e.g., 'Apache Spark', 'Great Expectations', 'Apache Kafka')."@en ;
+    rdfs:domain         dcat:DataService ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 8. DATATYPE PROPERTIES — ML Model
+# =============================================================================
+
+dali:trainingSplit
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "training split"@en ;
+    rdfs:comment        "Fraction of the dataset used for model training (0.0–1.0)."@en ;
+    rdfs:domain         mldcat:MLModel ;
+    rdfs:range          xsd:decimal ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:trainingHardware
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "training hardware"@en ;
+    rdfs:comment        "Hardware platform used for model training (e.g., 'NVIDIA A100 40GB GPU (x4)')."@en ;
+    rdfs:domain         mldcat:MLModel ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:trainingComputeEnv
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "training compute environment"@en ;
+    rdfs:comment        "Compute infrastructure used for model training (e.g., 'Kubernetes cluster', 'HPC cluster')."@en ;
+    rdfs:domain         mldcat:MLModel ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:biasMitigationApplied
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "bias mitigation applied"@en ;
+    rdfs:comment        "Description of bias mitigation techniques applied during training, or false if none."@en ;
+    rdfs:domain         mldcat:MLModel ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+dali:protectedAttributes
+    rdf:type            owl:DatatypeProperty ;
+    rdfs:label          "protected attributes"@en ;
+    rdfs:comment        "Demographic or sensitive attributes checked for fairness during model evaluation."@en ;
+    rdfs:domain         mldcat:MLModel ;
+    rdfs:range          xsd:string ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 9. CONTROLLED VOCABULARIES (SKOS Concept Schemes)
+# =============================================================================
+
+# --- Environment ---
+
+dali:EnvironmentScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Environment Types"@en ;
+    dct:description "Allowed values for dali:environment."@en .
+
+dali:env-indoors   rdf:type skos:Concept ; skos:prefLabel "indoors"@en   ; skos:inScheme dali:EnvironmentScheme ; skos:notation "indoors" .
+dali:env-urban     rdf:type skos:Concept ; skos:prefLabel "urban"@en     ; skos:inScheme dali:EnvironmentScheme ; skos:notation "urban" .
+dali:env-rural     rdf:type skos:Concept ; skos:prefLabel "rural"@en     ; skos:inScheme dali:EnvironmentScheme ; skos:notation "rural" .
+dali:env-mixed     rdf:type skos:Concept ; skos:prefLabel "mixed"@en     ; skos:inScheme dali:EnvironmentScheme ; skos:notation "mixed" .
+
+# --- Network Domain ---
+
+dali:NetworkDomainScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Network Domains"@en ;
+    dct:description "Allowed values for dali:networkDomain."@en .
+
+dali:nd-ran        rdf:type skos:Concept ; skos:prefLabel "RAN"@en       ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "RAN" .
+dali:nd-transport  rdf:type skos:Concept ; skos:prefLabel "Transport"@en ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "Transport" .
+dali:nd-core       rdf:type skos:Concept ; skos:prefLabel "CORE"@en      ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "CORE" .
+dali:nd-e2e        rdf:type skos:Concept ; skos:prefLabel "E2E"@en       ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "E2E" .
+
+# --- New Radio Type ---
+
+dali:NRTypeScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI New Radio Types"@en ;
+    dct:description "Allowed values for dali:ranNewRadioType."@en .
+
+dali:nr-sa         rdf:type skos:Concept ; skos:prefLabel "NR-SA"@en     ; skos:inScheme dali:NRTypeScheme ; skos:notation "NR-SA" .
+dali:nr-nsa        rdf:type skos:Concept ; skos:prefLabel "NR-NSA"@en    ; skos:inScheme dali:NRTypeScheme ; skos:notation "NR-NSA" .
+dali:nr-lte        rdf:type skos:Concept ; skos:prefLabel "LTE"@en       ; skos:inScheme dali:NRTypeScheme ; skos:notation "LTE" .
+
+# --- RAN Split ---
+
+dali:RANSplitScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI RAN Split Types"@en ;
+    dct:description "Allowed values for dali:ranSplit."@en .
+
+dali:split-du-ru   rdf:type skos:Concept ; skos:prefLabel "DU-RU split"@en  ; skos:inScheme dali:RANSplitScheme ; skos:notation "DU-RU split" .
+dali:split-none    rdf:type skos:Concept ; skos:prefLabel "No-Split"@en      ; skos:inScheme dali:RANSplitScheme ; skos:notation "No-Split" .
+dali:split-cu-du   rdf:type skos:Concept ; skos:prefLabel "CU-DU split"@en  ; skos:inScheme dali:RANSplitScheme ; skos:notation "CU-DU split" .
+
+# --- RAN Focused Technology ---
+
+dali:RANTechnologyScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI RAN Technologies"@en ;
+    dct:description "Allowed values for dali:ranFocusedTechnology."@en .
+
+dali:tech-oran     rdf:type skos:Concept ; skos:prefLabel "O-RAN"@en     ; skos:inScheme dali:RANTechnologyScheme ; skos:notation "O-RAN" .
+dali:tech-jsac     rdf:type skos:Concept ; skos:prefLabel "JSAC"@en      ; skos:inScheme dali:RANTechnologyScheme ; skos:notation "JSAC" .
+dali:tech-ric      rdf:type skos:Concept ; skos:prefLabel "RIC"@en       ; skos:inScheme dali:RANTechnologyScheme ; skos:notation "RIC" .
+dali:tech-nofocus  rdf:type skos:Concept ; skos:prefLabel "No focus"@en  ; skos:inScheme dali:RANTechnologyScheme ; skos:notation "No_focus" .
+
+# --- Coverage Type ---
+
+dali:CoverageTypeScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Coverage Types"@en ;
+    dct:description "Allowed values for dali:ranCoverageType."@en .
+
+dali:cov-macro     rdf:type skos:Concept ; skos:prefLabel "Single Macro"@en    ; skos:inScheme dali:CoverageTypeScheme ; skos:notation "Single_Macro" .
+dali:cov-micro     rdf:type skos:Concept ; skos:prefLabel "Single Micro"@en    ; skos:inScheme dali:CoverageTypeScheme ; skos:notation "Single_Micro" .
+dali:cov-multi     rdf:type skos:Concept ; skos:prefLabel "Multicell setup"@en ; skos:inScheme dali:CoverageTypeScheme ; skos:notation "Multicell_setup" .
+
+# --- Mobility Model ---
+
+dali:MobilityModelScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Mobility Models"@en ;
+    dct:description "Allowed values for dali:ranMobilityModel."@en .
+
+dali:mob-static      rdf:type skos:Concept ; skos:prefLabel "static"@en      ; skos:inScheme dali:MobilityModelScheme ; skos:notation "static" .
+dali:mob-pedestrian  rdf:type skos:Concept ; skos:prefLabel "pedestrian"@en  ; skos:inScheme dali:MobilityModelScheme ; skos:notation "pedestrian" .
+dali:mob-vehicular   rdf:type skos:Concept ; skos:prefLabel "vehicular"@en   ; skos:inScheme dali:MobilityModelScheme ; skos:notation "vehicular" .
+dali:mob-uav         rdf:type skos:Concept ; skos:prefLabel "UAV"@en         ; skos:inScheme dali:MobilityModelScheme ; skos:notation "UAV" .
+dali:mob-mixed       rdf:type skos:Concept ; skos:prefLabel "mixed"@en       ; skos:inScheme dali:MobilityModelScheme ; skos:notation "mixed" .
+
+# --- Core Solution ---
+
+dali:CoreSolutionScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Core Solution Types"@en ;
+    dct:description "Allowed values for dali:coreSolution."@en .
+
+dali:core-opensource  rdf:type skos:Concept ; skos:prefLabel "Open Source"@en  ; skos:inScheme dali:CoreSolutionScheme ; skos:notation "OpenSource" .
+dali:core-commercial  rdf:type skos:Concept ; skos:prefLabel "Commercial"@en   ; skos:inScheme dali:CoreSolutionScheme ; skos:notation "Commercial" .
+
+# --- Transport Type ---
+
+dali:TransportTypeScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Transport Types"@en ;
+    dct:description "Allowed values for dali:transportType."@en .
+
+dali:tr-wired        rdf:type skos:Concept ; skos:prefLabel "wired"@en        ; skos:inScheme dali:TransportTypeScheme ; skos:notation "wired" .
+dali:tr-microwave    rdf:type skos:Concept ; skos:prefLabel "microwave"@en    ; skos:inScheme dali:TransportTypeScheme ; skos:notation "microwave" .
+dali:tr-fiberoptics  rdf:type skos:Concept ; skos:prefLabel "fiber optics"@en ; skos:inScheme dali:TransportTypeScheme ; skos:notation "fiber_optics" .
+dali:tr-satellite    rdf:type skos:Concept ; skos:prefLabel "satellite"@en    ; skos:inScheme dali:TransportTypeScheme ; skos:notation "satellite" .
+dali:tr-mixed        rdf:type skos:Concept ; skos:prefLabel "mixed"@en        ; skos:inScheme dali:TransportTypeScheme ; skos:notation "mixed" .
+
+# --- Orchestrator ---
+
+dali:OrchestratorScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Orchestrator Types"@en ;
+    dct:description "Allowed values for dali:computeOrchestratorType."@en .
+
+dali:orch-k8s        rdf:type skos:Concept ; skos:prefLabel "Kubernetes"@en  ; skos:inScheme dali:OrchestratorScheme ; skos:notation "Kubernetes" .
+dali:orch-openstack  rdf:type skos:Concept ; skos:prefLabel "OpenStack"@en   ; skos:inScheme dali:OrchestratorScheme ; skos:notation "OpenStack" .
+dali:orch-openslice  rdf:type skos:Concept ; skos:prefLabel "openSlice"@en   ; skos:inScheme dali:OrchestratorScheme ; skos:notation "openSlice" .
+dali:orch-onap       rdf:type skos:Concept ; skos:prefLabel "ONAP"@en        ; skos:inScheme dali:OrchestratorScheme ; skos:notation "ONAP" .
+dali:orch-osm        rdf:type skos:Concept ; skos:prefLabel "OSM"@en         ; skos:inScheme dali:OrchestratorScheme ; skos:notation "OSM" .
+dali:orch-none       rdf:type skos:Concept ; skos:prefLabel "None"@en        ; skos:inScheme dali:OrchestratorScheme ; skos:notation "None" .
+
+# --- Virtualisation ---
+
+dali:VirtualizationScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Virtualisation Types"@en ;
+    dct:description "Allowed values for dali:computeVirtualizationType."@en .
+
+dali:virt-kvm        rdf:type skos:Concept ; skos:prefLabel "KVM"@en        ; skos:inScheme dali:VirtualizationScheme ; skos:notation "KVM" .
+dali:virt-docker     rdf:type skos:Concept ; skos:prefLabel "Docker"@en     ; skos:inScheme dali:VirtualizationScheme ; skos:notation "Docker" .
+dali:virt-baremetal  rdf:type skos:Concept ; skos:prefLabel "Bare-metal"@en ; skos:inScheme dali:VirtualizationScheme ; skos:notation "Bare-metal" .
+dali:virt-mixed      rdf:type skos:Concept ; skos:prefLabel "mixed"@en      ; skos:inScheme dali:VirtualizationScheme ; skos:notation "mixed" .
+
+# --- Traffic Origin ---
+
+dali:TrafficOriginScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Traffic Origins"@en ;
+    dct:description "Allowed values for dali:trafficOrigin."@en .
+
+dali:torg-manual      rdf:type skos:Concept ; skos:prefLabel "Manual"@en      ; skos:inScheme dali:TrafficOriginScheme ; skos:notation "Manual" .
+dali:torg-application rdf:type skos:Concept ; skos:prefLabel "Application"@en ; skos:inScheme dali:TrafficOriginScheme ; skos:notation "Application" .
+
+# --- Traffic Pattern ---
+
+dali:TrafficPatternScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Traffic Patterns"@en ;
+    dct:description "Allowed values for dali:trafficPattern."@en .
+
+dali:tp-uldl-udp    rdf:type skos:Concept ; skos:prefLabel "UL/DL UDP"@en    ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "UL/DL UDP" .
+dali:tp-uldl-tcp    rdf:type skos:Concept ; skos:prefLabel "UL/DL TCP"@en    ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "UL/DL TCP" .
+dali:tp-uldl-mptcp  rdf:type skos:Concept ; skos:prefLabel "UL/DL MPTCP"@en ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "UL/DL MPTCP" .
+dali:tp-dl-udp      rdf:type skos:Concept ; skos:prefLabel "DL UDP"@en       ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "DL UDP" .
+dali:tp-dl-tcp      rdf:type skos:Concept ; skos:prefLabel "DL TCP"@en       ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "DL TCP" .
+dali:tp-dl-mptcp    rdf:type skos:Concept ; skos:prefLabel "DL MPTCP"@en     ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "DL MPTCP" .
+dali:tp-ul-udp      rdf:type skos:Concept ; skos:prefLabel "UL UDP"@en       ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "UL UDP" .
+dali:tp-ul-tcp      rdf:type skos:Concept ; skos:prefLabel "UL TCP"@en       ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "UL TCP" .
+dali:tp-ul-mptcp    rdf:type skos:Concept ; skos:prefLabel "UL MPTCP"@en     ; skos:inScheme dali:TrafficPatternScheme ; skos:notation "UL MPTCP" .
+
+# --- Reference Plane ---
+
+dali:ReferencePlaneScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Reference Planes"@en ;
+    dct:description "Allowed values for dali:referencePlane."@en .
+
+dali:plane-control    rdf:type skos:Concept ; skos:prefLabel "control plane"@en    ; skos:inScheme dali:ReferencePlaneScheme ; skos:notation "control plane" .
+dali:plane-data       rdf:type skos:Concept ; skos:prefLabel "data plane"@en       ; skos:inScheme dali:ReferencePlaneScheme ; skos:notation "data plane" .
+dali:plane-management rdf:type skos:Concept ; skos:prefLabel "management plane"@en ; skos:inScheme dali:ReferencePlaneScheme ; skos:notation "management plane" .
+
+# --- Observation Point Horizontal (CMT Annex 1) ---
+
+dali:ObservationPointHScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Horizontal Observation Points"@en ;
+    dct:description "Horizontal observation points per SNS-JU CMT Annex 1 (5GPP Arch WG View on 5G Architecture)."@en .
+
+dali:obs-h-e2e       rdf:type skos:Concept ; skos:prefLabel "E2E Application layer"@en    ; skos:inScheme dali:ObservationPointHScheme ; skos:notation "E2E Application layer" .
+dali:obs-h-ue-access rdf:type skos:Concept ; skos:prefLabel "End device to Access"@en     ; skos:inScheme dali:ObservationPointHScheme ; skos:notation "End device to Access" .
+dali:obs-h-du-cu     rdf:type skos:Concept ; skos:prefLabel "DU to CU"@en                 ; skos:inScheme dali:ObservationPointHScheme ; skos:notation "DU to CU" .
+dali:obs-h-acc-edge  rdf:type skos:Concept ; skos:prefLabel "Access to Edge"@en            ; skos:inScheme dali:ObservationPointHScheme ; skos:notation "Access to Edge" .
+dali:obs-h-acc-core  rdf:type skos:Concept ; skos:prefLabel "Access to Core"@en            ; skos:inScheme dali:ObservationPointHScheme ; skos:notation "Access to Core" .
+dali:obs-h-core-cld  rdf:type skos:Concept ; skos:prefLabel "Core to Cloud"@en             ; skos:inScheme dali:ObservationPointHScheme ; skos:notation "Core to Cloud" .
+
+# --- Observation Point Vertical ---
+
+dali:ObservationPointVScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI Vertical Observation Points"@en ;
+    dct:description "Vertical (protocol stack) observation layers."@en .
+
+dali:obs-v-radio    rdf:type skos:Concept ; skos:prefLabel "Radio Level"@en           ; skos:inScheme dali:ObservationPointVScheme ; skos:notation "Radio Level" .
+dali:obs-v-network  rdf:type skos:Concept ; skos:prefLabel "Network Layer"@en         ; skos:inScheme dali:ObservationPointVScheme ; skos:notation "Network Layer" .
+dali:obs-v-app      rdf:type skos:Concept ; skos:prefLabel "Application Layer"@en     ; skos:inScheme dali:ObservationPointVScheme ; skos:notation "Application Layer" .
+dali:obs-v-compute  rdf:type skos:Concept ; skos:prefLabel "Compute Resource-level"@en; skos:inScheme dali:ObservationPointVScheme ; skos:notation "Compute Resource-level" .
+dali:obs-v-cross    rdf:type skos:Concept ; skos:prefLabel "cross-layer"@en           ; skos:inScheme dali:ObservationPointVScheme ; skos:notation "cross-layer" .
+dali:obs-v-other    rdf:type skos:Concept ; skos:prefLabel "other"@en                 ; skos:inScheme dali:ObservationPointVScheme ; skos:notation "other" .
+
+# --- Service Type ---
+
+dali:ServiceTypeScheme
+    rdf:type        skos:ConceptScheme ;
+    skos:prefLabel  "6G-DALI DataOps Service Types"@en ;
+    dct:description "Allowed values for dali:serviceType on dcat:DataService resources."@en .
+
+dali:svc-transformation    rdf:type skos:Concept ; skos:prefLabel "Transformation"@en    ; skos:inScheme dali:ServiceTypeScheme ; skos:notation "Transformation" .
+dali:svc-qualitycheck      rdf:type skos:Concept ; skos:prefLabel "Quality Check"@en     ; skos:inScheme dali:ServiceTypeScheme ; skos:notation "QualityCheck" .
+dali:svc-augmentation      rdf:type skos:Concept ; skos:prefLabel "Augmentation"@en      ; skos:inScheme dali:ServiceTypeScheme ; skos:notation "Augmentation" .
+dali:svc-aggregation       rdf:type skos:Concept ; skos:prefLabel "Aggregation"@en       ; skos:inScheme dali:ServiceTypeScheme ; skos:notation "Aggregation" .
+dali:svc-anonymisation     rdf:type skos:Concept ; skos:prefLabel "Anonymisation"@en     ; skos:inScheme dali:ServiceTypeScheme ; skos:notation "Anonymisation" .
+dali:svc-featureengineering rdf:type skos:Concept ; skos:prefLabel "Feature Engineering"@en ; skos:inScheme dali:ServiceTypeScheme ; skos:notation "Feature Engineering" .
+
+
+# =============================================================================
+# 10. DQV QUALITY DIMENSIONS
+# =============================================================================
+
+dali:dqv/completeness
+    rdf:type        dqv:Dimension ;
+    rdfs:label      "Completeness"@en ;
+    rdfs:comment    "The degree to which all required data values are present and non-null."@en ;
+    rdfs:isDefinedBy <https://dali-project.eu/ns> .
+
+dali:dqv/accuracy
+    rdf:type        dqv:Dimension ;
+    rdfs:label      "Accuracy"@en ;
+    rdfs:comment    "The degree to which data correctly represents the real-world phenomenon it describes."@en ;
+    rdfs:isDefinedBy <https://dali-project.eu/ns> .
+
+dali:dqv/timeliness
+    rdf:type        dqv:Dimension ;
+    rdfs:label      "Timeliness"@en ;
+    rdfs:comment    "The degree to which data is sufficiently up-to-date for its intended use."@en ;
+    rdfs:isDefinedBy <https://dali-project.eu/ns> .
+
+dali:dqv/consistency
+    rdf:type        dqv:Dimension ;
+    rdfs:label      "Consistency"@en ;
+    rdfs:comment    "The degree to which data adheres to defined schema, formats, and value constraints."@en ;
+    rdfs:isDefinedBy <https://dali-project.eu/ns> .
+
+dali:dqv/uniqueness
+    rdf:type        dqv:Dimension ;
+    rdfs:label      "Uniqueness"@en ;
+    rdfs:comment    "The degree to which data is free from duplicate records."@en ;
+    rdfs:isDefinedBy <https://dali-project.eu/ns> .
+
+dali:dqv/validity
+    rdf:type        dqv:Dimension ;
+    rdfs:label      "Validity"@en ;
+    rdfs:comment    "The degree to which data values conform to defined formats, ranges, and business rules."@en ;
+    rdfs:isDefinedBy <https://dali-project.eu/ns> .
+
+dali:dqv/modelperformance
+    rdf:type        dqv:Dimension ;
+    rdfs:label      "Model Performance"@en ;
+    rdfs:comment    "Quantitative performance characteristics of an ML model on an evaluation dataset."@en ;
+    rdfs:isDefinedBy <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 11. DQV QUALITY METRICS — Dataset quality
+# =============================================================================
+
+dali:metric/completeness-generic
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Generic completeness"@en ;
+    rdfs:comment            "Fraction of non-null values across all columns (GE: expect_column_values_to_not_be_null)."@en ;
+    dqv:inDimension         dali:dqv/completeness ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/row-count
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Row count"@en ;
+    rdfs:comment            "Total number of records in the dataset (GE: expect_table_row_count_to_be_between)."@en ;
+    dqv:inDimension         dali:dqv/completeness ;
+    dqv:expectedDataType    xsd:integer ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/schema-conformance
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Schema conformance"@en ;
+    rdfs:comment            "Whether the dataset conforms to its declared column schema (GE: expect_column_to_exist, expect_column_values_to_be_of_type)."@en ;
+    dqv:inDimension         dali:dqv/consistency ;
+    dqv:expectedDataType    xsd:boolean ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/value-range-validity
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Value range validity"@en ;
+    rdfs:comment            "Fraction of values within the expected range (GE: expect_column_values_to_be_between)."@en ;
+    dqv:inDimension         dali:dqv/validity ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/uniqueness-rate
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Uniqueness rate"@en ;
+    rdfs:comment            "Fraction of unique rows in the dataset (GE: expect_column_values_to_be_unique)."@en ;
+    dqv:inDimension         dali:dqv/uniqueness ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/data-freshness-days
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Data freshness (days)"@en ;
+    rdfs:comment            "Number of days elapsed since the dataset was last updated."@en ;
+    dqv:inDimension         dali:dqv/timeliness ;
+    dqv:expectedDataType    xsd:integer ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+
+# =============================================================================
+# 12. DQV QUALITY METRICS — ML Model performance
+# =============================================================================
+
+dali:metric/model-accuracy
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Model accuracy"@en ;
+    rdfs:comment            "Classification accuracy of the model on the test set."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/model-f1
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Model F1 score"@en ;
+    rdfs:comment            "Macro-averaged F1 score of the model on the test set."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/model-precision
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Model precision"@en ;
+    rdfs:comment            "Precision of the model on the test set."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/model-recall
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Model recall"@en ;
+    rdfs:comment            "Recall of the model on the test set."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/model-mae
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Mean Absolute Error (MAE)"@en ;
+    rdfs:comment            "Mean Absolute Error of the model on the test set (regression tasks)."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/model-rmse
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Root Mean Square Error (RMSE)"@en ;
+    rdfs:comment            "Root Mean Square Error of the model on the test set (regression tasks)."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/localization-error-m
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Mean localization error (metres)"@en ;
+    rdfs:comment            "Mean Euclidean distance between predicted and ground-truth positions, in metres. Specific to 6G/5G localization models."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/inference-latency-ms
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Inference latency (ms)"@en ;
+    rdfs:comment            "Average time in milliseconds to produce one model inference."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/model-size-mb
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Model size (MB)"@en ;
+    rdfs:comment            "Size of the serialised model artefact in megabytes."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .
+
+dali:metric/model-fairness-disparate-impact
+    rdf:type                dqv:Metric ;
+    rdfs:label              "Disparate impact ratio"@en ;
+    rdfs:comment            "Ratio of positive prediction rates between protected and non-protected groups (fairness metric)."@en ;
+    dqv:inDimension         dali:dqv/modelperformance ;
+    dqv:expectedDataType    xsd:decimal ;
+    rdfs:isDefinedBy        <https://dali-project.eu/ns> .

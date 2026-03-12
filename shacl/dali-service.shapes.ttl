@@ -1,0 +1,190 @@
+# 6G-DALI SHACL Shapes — Data Service
+# Defines validation shapes for dcat:DataService resources representing
+# DataOps pipelines (transformations, quality checks, augmentations, etc.).
+#
+# Severity levels:
+#   sh:Violation  — Mandatory (M)
+#   sh:Warning    — Recommended (R)
+
+PREFIX adms:   <http://www.w3.org/ns/adms#>
+PREFIX dcat:   <http://www.w3.org/ns/dcat#>
+PREFIX dct:    <http://purl.org/dc/terms/>
+PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+PREFIX sh:     <http://www.w3.org/ns/shacl#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX dali:   <https://dali-project.eu/ns#>
+
+# ---------------------------------------------------------------------------
+# dali:DataServiceShape
+# Node shape for dcat:DataService resources in the 6G-DALI Data Space.
+# ---------------------------------------------------------------------------
+
+dali:DataServiceShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI Data Service" ;
+    sh:description "Shape for dcat:DataService resources representing DataOps pipelines in the 6G-DALI Data Space." ;
+    sh:targetClass  dcat:DataService ;
+
+    # --- Mandatory ---
+
+    sh:property [
+        sh:path         dct:title ;
+        sh:name         "Title" ;
+        sh:minCount     1 ;
+        sh:datatype     rdf:langString ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:title is mandatory on dcat:DataService."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:description ;
+        sh:name         "Description" ;
+        sh:minCount     1 ;
+        sh:datatype     rdf:langString ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:description is mandatory on dcat:DataService."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:endpointURL ;
+        sh:name         "Endpoint URL" ;
+        sh:description  "URL of the service endpoint (API or processing trigger)." ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dcat:endpointURL is mandatory on dcat:DataService."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:license ;
+        sh:name         "License" ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:license is mandatory on dcat:DataService."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:accessRights ;
+        sh:name         "Access rights" ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:accessRights is mandatory on dcat:DataService."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:publisher ;
+        sh:name         "Publisher" ;
+        sh:minCount     1 ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Violation ;
+        sh:message      "dct:publisher is mandatory on dcat:DataService."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:serviceType ;
+        sh:name         "Service type" ;
+        sh:description  "Nature of the DataOps service." ;
+        sh:minCount     1 ;
+        sh:datatype     xsd:string ;
+        sh:in           ( "Transformation"
+                          "QualityCheck"
+                          "Augmentation"
+                          "Aggregation"
+                          "Anonymisation"
+                          "Feature Engineering" ) ;
+        sh:severity     sh:Violation ;
+        sh:message      "dali:serviceType is mandatory. Allowed values: Transformation, QualityCheck, Augmentation, Aggregation, Anonymisation, Feature Engineering."@en ;
+    ] ;
+
+    # --- Recommended ---
+
+    sh:property [
+        sh:path         dcat:endpointDescription ;
+        sh:name         "Endpoint description" ;
+        sh:description  "OpenAPI or other specification URI describing the endpoint." ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:endpointDescription is recommended (e.g., OpenAPI 3.0 document URI)."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:servesDataset ;
+        sh:name         "Serves dataset" ;
+        sh:description  "Input dataset(s) that this service operates on." ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:servesDataset is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:contactPoint ;
+        sh:name         "Contact point" ;
+        sh:nodeKind     sh:BlankNodeOrIRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:contactPoint is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dcat:theme ;
+        sh:name         "Theme" ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:theme is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         adms:version ;
+        sh:name         "Version" ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "adms:version is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:inputFormat ;
+        sh:name         "Input format" ;
+        sh:description  "Expected IANA media type of input data (e.g., 'text/csv')." ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "dali:inputFormat is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:outputFormat ;
+        sh:name         "Output format" ;
+        sh:description  "Produced IANA media type of output data." ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "dali:outputFormat is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dali:framework ;
+        sh:name         "Processing framework" ;
+        sh:description  "Software framework used (e.g., 'Apache Spark', 'Great Expectations')." ;
+        sh:datatype     xsd:string ;
+        sh:severity     sh:Warning ;
+        sh:message      "dali:framework is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         schema:codeRepository ;
+        sh:name         "Code repository" ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "schema:codeRepository is recommended."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         dct:conformsTo ;
+        sh:name         "Conforms to" ;
+        sh:description  "Specification the service endpoint conforms to (e.g., OpenAPI 3.0 URI)." ;
+        sh:nodeKind     sh:IRI ;
+        sh:severity     sh:Warning ;
+        sh:message      "dct:conformsTo is recommended."@en ;
+    ] .

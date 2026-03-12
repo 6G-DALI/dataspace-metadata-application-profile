@@ -1,0 +1,194 @@
+PREFIX adms:   <http://www.w3.org/ns/adms#>
+PREFIX dcat:   <http://www.w3.org/ns/dcat#>
+PREFIX dct:    <http://purl.org/dc/terms/>
+PREFIX dqv:    <http://www.w3.org/ns/dqv#>
+PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX gax:    <https://registry.lab.gaia-x.eu/v1/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#>
+PREFIX prov:   <http://www.w3.org/ns/prov#>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+PREFIX skos:   <http://www.w3.org/2004/02/skos/core#>
+PREFIX vcard:  <http://www.w3.org/2006/vcard/ns#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX dali:   <https://dali-project.eu/ns#>
+
+# =============================================================================
+# Dataset: Massive MIMO Channel Measurement Data Set for Localization and Communication
+# Producer: KU Leuven WaveCoRE
+# =============================================================================
+
+<https://dataspace.6gdali.eu/set/data/dali-dataset-2>
+    rdf:type                     dcat:Dataset, gax:DataResource ;
+
+    # --- Core identity ---
+    dct:title                    "Massive MIMO Channel Measurement Data Set for Localization and Communication"@en ;
+    dct:description              "Ultra dense indoor Massive MIMO Channel State Information (CSI) dataset containing 252,004 location-labelled CSI samples with 5mm spatial resolution. The dataset includes measurements from three antenna topologies (URA, ULA, DA) using a 64-antenna testbed for joint communication and sensing research. Features automated positioning system with millimeter accuracy and supports machine learning-based localization and communication optimization."@en ;
+    dct:identifier               "0881566" ;
+    dct:issued                   "2022-11-10"^^xsd:date ;
+    dct:modified                 "2022-11-10"^^xsd:date ;
+    dct:language                 <http://publications.europa.eu/resource/authority/language/ENG> ;
+    adms:version                 "v1" ;
+    adms:identifier              [ rdf:type            adms:Identifier ;
+                                   skos:notation       "10.24433/CO.0881566.v1" ;
+                                   adms:schemeAgency   "DataCite" ] ;
+
+    # --- Access & license ---
+    dct:accessRights             <http://publications.europa.eu/resource/authority/access-right/PUBLIC> ;
+    dct:license                  <https://creativecommons.org/licenses/by/4.0/> ;
+    dct:rights                   "Open Access"@en ;
+
+    # --- Publisher, creators, contact ---
+    dct:publisher                [ rdf:type       foaf:Organization ;
+                                   foaf:name      "Code Ocean" ;
+                                   foaf:homepage  <https://codeocean.com> ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Achiel Colpaert" ;
+                                   schema:affiliation  "KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Sibren De Bast" ;
+                                   schema:affiliation  "KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Andrea P. Guevara" ;
+                                   schema:affiliation  "KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Zhuangzhuang Cui" ;
+                                   schema:affiliation  "KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Sofie Pollin" ;
+                                   schema:affiliation  "KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dcat:contactPoint            [ rdf:type        vcard:Organization ;
+                                   vcard:fn        "KU Leuven WaveCoRE Research Group" ;
+                                   vcard:hasEmail  <mailto:sofie.pollin@kuleuven.be> ;
+                                   vcard:hasURL    <https://www.esat.kuleuven.be/wavecore/> ] ;
+
+    # --- Categorisation ---
+    dcat:theme                   <http://publications.europa.eu/resource/authority/data-theme/TECH> ,
+                                 <http://publications.europa.eu/resource/authority/data-theme/ENER> ;
+    dcat:keyword                 "radio frequency"@en , "indoor positioning"@en , "localization"@en ,
+                                 "machine learning"@en , "5G"@en , "testbed measurements"@en ,
+                                 "joint communication and sensing"@en , "CSI"@en ,
+                                 "antenna arrays"@en , "Massive MIMO"@en , "beamforming"@en ,
+                                 "communication"@en , "Channel State Information"@en ,
+                                 "wireless communications"@en , "convolutional neural network"@en ;
+    dcat:landingPage             <https://codeocean.com/capsule/0881566/tree/v1> ;
+
+    # --- Spatial & temporal coverage ---
+    dct:spatial                  <http://publications.europa.eu/resource/authority/country/BEL> ;
+    schema:geo                   [ rdf:type           schema:GeoCoordinates ;
+                                   schema:address     "KU Leuven MaMIMO Lab, Leuven, Belgium" ;
+                                   schema:latitude    "50.862" ;
+                                   schema:longitude   "4.686" ] ;
+    schema:spatialCoverage       "Leuven, Belgium - KU Leuven MaMIMO Lab"@en ;
+    dct:temporal                 [ rdf:type        dct:PeriodOfTime ;
+                                   dcat:startDate  "2022-01-01"^^xsd:date ;
+                                   dcat:endDate    "2022-10-01"^^xsd:date ] ;
+
+    # --- Standards conformance ---
+    dct:conformsTo               <https://www.go-fair.org/fair-principles/> ,
+                                 <https://codeocean.com/reproducibility-standards> ;
+    dct:isVersionOf              <https://codeocean.com/capsule/0881566> ;
+    dct:bibliographicCitation    "Colpaert, A., De Bast, S., Guevara, A. P., Cui, Z., & Pollin, S. (2022). Massive MIMO Channel Measurement Data Set for Localization and Communication. arXiv preprint arXiv:2211.05527." ;
+    dct:relation                 <https://dx.doi.org/10.21227/nr6k-8r78> ,
+                                 <https://arxiv.org/abs/2211.05527> ;
+    schema:citation              <https://arxiv.org/abs/2211.05527> ;
+
+    # --- Dataset series ---
+    dct:isPartOf                 [ rdf:type         dcat:DatasetSeries ;
+                                   dct:title        "KU Leuven Massive MIMO Research Datasets"@en ;
+                                   dct:description  "Series of datasets from KU Leuven WaveCoRE research on Massive MIMO systems"@en ] ;
+
+    # --- 6G-DALI specific ---
+    dali:snsProjectName          "6G-DALI" ;
+    dali:gdprCompliant           true^^xsd:boolean ;
+    dali:fairCompliant           true^^xsd:boolean ;
+
+    # --- GAIA-X ---
+    gax:containsPII              false^^xsd:boolean ;
+    gax:producedBy               <https://dataspace.6gdali.eu/participant/ku-leuven> ;
+
+    # --- Testbed context (CMT) ---
+    dali:testbedContext          [
+        rdf:type                         dali:TestbedContext ;
+        dali:underlayPlatform            <https://www.esat.kuleuven.be/wavecore/> ;
+        dali:environment                 "indoors" ;
+        dali:networkDomain               "RAN" ;
+        dali:ran3gppRelease              "Release 15" ;
+        dali:ranFocusedTechnology        "JSAC" ;
+        dali:ranCoverageType             "Single_Micro" ;
+        dali:ranFrequencyBand            "2.61GHz" ;
+        dali:ranBandwidthMHz             40 ;
+        dali:ranMaxEndDevices            43 ;
+        dali:ranMobilityModel            "static" ;
+        dali:computeOrchestratorType     "None" ;
+        dali:computeGpuUse               false^^xsd:boolean ;
+        dali:observationPointHorizontal  "End device to Access" ;
+        dali:observationPointVertical    "Radio Level" ;
+        dali:measurementFamily           "L1M" ;
+        dali:measurementTool             "MaMIMO testbed (custom 64-antenna), CNC automated positioning table" ;
+    ] ;
+
+    # --- Measured variables ---
+    schema:variableMeasured      "Channel State Information (CSI) matrix 64×100 complex values"@en ;
+    schema:measurementTechnique  "Automated CNC-based positioning system with millimeter accuracy"@en ;
+
+    # --- Provenance ---
+    dct:provenance               [ rdf:type    dct:ProvenanceStatement ;
+                                   rdfs:label  "Collected by KU Leuven WaveCoRE using a 64-antenna MaMIMO testbed and CNC-controlled positioning tables at KU Leuven MaMIMO Lab. Data uploaded to the 6G-DALI Data Space."@en ] ;
+    prov:wasAttributedTo         <https://dataspace.6gdali.eu/participant/ku-leuven> ;
+
+    # --- Funding ---
+    schema:funding               [ rdf:type           schema:Grant ;
+                                   schema:funder      "European Union Horizon 2020" ;
+                                   schema:identifier  "101013425" ;
+                                   schema:name        "REINDEER Project" ] ;
+    schema:funding               [ rdf:type           schema:Grant ;
+                                   schema:funder      "European Union Horizon 2020" ;
+                                   schema:identifier  "101017171" ;
+                                   schema:name        "MARSAL Project" ] ;
+
+    # --- Schema.org additional fields ---
+    schema:about                 "Dense dataset containing 252,004 location-labelled Channel State Information samples measured using a 64-antenna Massive MIMO testbed. Three antenna configurations: Uniform Rectangular Array (URA), Uniform Linear Array (ULA), and Distributed Array (DA). Frequency: 2.61GHz, spatial resolution: 5mm, positioning accuracy: <0.1mm using CNC tables."@en ;
+    schema:applicationCategory   "Machine Learning" , "5G/6G Research" ,
+                                 "Wireless Communications" , "Localization Systems" ;
+    schema:description           "Achieved localization accuracy: 18-21mm mean error using CNN. Spectral efficiency improvement through location-based user scheduling. Supports up to 43 simultaneous users with distributed antenna configuration."@en ;
+    schema:datePublished         "2022-11-10"^^xsd:date ;
+    schema:isAccessibleForFree   true ;
+    schema:url                   <https://codeocean.com/capsule/0881566/tree/v1> ;
+
+    # --- Distributions ---
+    dcat:byteSize                "several GB" ;
+    dcat:distribution            <https://dataspace.6gdali.eu/set/distribution/0b2d5713-c0ca-4dda-97b0-95b26ea65236> ,
+                                 <https://dataspace.6gdali.eu/set/distribution/513b5223-f278-4c49-af21-502cd371d90c> ,
+                                 <https://dataspace.6gdali.eu/set/distribution/d9a46862-9d40-4928-92ca-31753558b947> .
+
+
+<https://dataspace.6gdali.eu/set/distribution/513b5223-f278-4c49-af21-502cd371d90c>
+    rdf:type            dcat:Distribution ;
+    dct:title           "IEEE DataPort Dataset"@en ;
+    dct:description     "Raw CSI measurement data available through IEEE DataPort platform"@en ;
+    dct:format          <http://publications.europa.eu/resource/authority/file-type/BIN> ;
+    dct:license         <https://creativecommons.org/licenses/by/4.0/> ;
+    dcat:accessURL      <https://dx.doi.org/10.21227/nr6k-8r78> ;
+    dcat:mediaType      "application/octet-stream" ;
+    schema:description  "Binary files containing 64×100 complex CSI matrices for all measurement positions"@en .
+
+<https://dataspace.6gdali.eu/set/distribution/0b2d5713-c0ca-4dda-97b0-95b26ea65236>
+    rdf:type                    dcat:Distribution ;
+    dct:title                   "Research Code and Algorithms"@en ;
+    dct:description             "CNN implementation for CSI-based localization and communication optimization algorithms"@en ;
+    dct:format                  <http://publications.europa.eu/resource/authority/file-type/PY> ;
+    dct:license                 <https://creativecommons.org/licenses/by/4.0/> ;
+    dcat:accessURL              <https://codeocean.com/capsule/0881566/tree/v1> ;
+    dcat:mediaType              "text/x-python" ;
+    schema:programmingLanguage  "Python" .
+
+<https://dataspace.6gdali.eu/set/distribution/d9a46862-9d40-4928-92ca-31753558b947>
+    rdf:type            dcat:Distribution ;
+    dct:title           "Interactive Compute Capsule"@en ;
+    dct:description     "Full computational environment with code, data, and reproducible analysis for Massive MIMO channel measurements"@en ;
+    dct:format          <http://publications.europa.eu/resource/authority/file-type/HTML> ;
+    dct:license         <https://creativecommons.org/licenses/by/4.0/> ;
+    dcat:accessURL      <https://codeocean.com/capsule/0881566/tree/v1> ;
+    dcat:mediaType      "text/html" ;
+    schema:description  "Provides access to CNN-based localization algorithms, beamforming visualization, and spectral efficiency analysis tools"@en .

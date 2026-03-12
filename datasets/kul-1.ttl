@@ -1,0 +1,192 @@
+PREFIX adms:   <http://www.w3.org/ns/adms#>
+PREFIX dcat:   <http://www.w3.org/ns/dcat#>
+PREFIX dct:    <http://purl.org/dc/terms/>
+PREFIX dqv:    <http://www.w3.org/ns/dqv#>
+PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX gax:    <https://registry.lab.gaia-x.eu/v1/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#>
+PREFIX prov:   <http://www.w3.org/ns/prov#>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+PREFIX skos:   <http://www.w3.org/2004/02/skos/core#>
+PREFIX vcard:  <http://www.w3.org/2006/vcard/ns#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX dali:   <https://dali-project.eu/ns#>
+
+# =============================================================================
+# Dataset: 3D Non-Stationary Channel Measurement for MaMIMO-UAV Communications
+# Producer: KU Leuven WaveCoRE (IMEC)
+# =============================================================================
+
+<https://dataspace.6gdali.eu/set/data/dali-dataset-3>
+    rdf:type                     dcat:Dataset, gax:DataResource ;
+
+    # --- Core identity ---
+    dct:title                    "3D Non-Stationary Channel Measurement and Analysis for MaMIMO-UAV Communications"@en ;
+    dct:description              "Comprehensive 3D UAV Massive MIMO channel measurement dataset for air-to-ground (A2G) communications featuring multi-dimensional channel stationarity analysis. Dataset includes Channel State Information (CSI) measurements from a 64-antenna base station and drone-mounted user equipment at three different altitudes (8m, 11m, 24m). Features novel stationary angle metric, space-time-frequency channel analysis, and comprehensive non-stationarity characterization for 6G UAV communications research."@en ;
+    dct:identifier               "0IMQDF" ;
+    dct:issued                   "2023-10-10"^^xsd:date ;
+    dct:modified                 "2023-12-11"^^xsd:date ;
+    dct:language                 <http://publications.europa.eu/resource/authority/language/ENG> ;
+    adms:version                 "v2" ;
+    adms:identifier              [ rdf:type            adms:Identifier ;
+                                   skos:notation       "10.48804/0IMQDF" ;
+                                   adms:schemeAgency   "DataCite" ] ;
+
+    # --- Access & license ---
+    dct:accessRights             <http://publications.europa.eu/resource/authority/access-right/PUBLIC> ;
+    dct:license                  <https://creativecommons.org/licenses/by/4.0/> ;
+    dct:rights                   "Open Access"@en ;
+
+    # --- Publisher, creators, contact ---
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Achiel Colpaert" ;
+                                   foaf:mbox           <mailto:achiel.colpaert@imec.be> ;
+                                   schema:affiliation  "IMEC and KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Zhuangzhuang Cui" ;
+                                   foaf:mbox           <mailto:zhuangzhuang.cui@kuleuven.be> ;
+                                   schema:affiliation  "KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Evgenii Vinogradov" ;
+                                   foaf:mbox           <mailto:evgenii.vinogradov@tii.ae> ;
+                                   schema:affiliation  "KU Leuven ESAT and Technology Innovation Institute (TII), Abu Dhabi, UAE" ] ;
+    dct:creator                  [ rdf:type            foaf:Person ;
+                                   foaf:name           "Sofie Pollin" ;
+                                   foaf:mbox           <mailto:sofie.pollin@kuleuven.be> ;
+                                   schema:affiliation  "KU Leuven - WaveCoRE, Department of Electrical Engineering (ESAT)" ] ;
+    dcat:contactPoint            [ rdf:type        vcard:Organization ;
+                                   vcard:fn        "KU Leuven WaveCoRE Research Group" ;
+                                   vcard:hasEmail  <mailto:sofie.pollin@kuleuven.be> ;
+                                   vcard:hasURL    <https://www.esat.kuleuven.be/wavecore/> ] ;
+
+    # --- Categorisation ---
+    dcat:theme                   <http://publications.europa.eu/resource/authority/data-theme/TECH> ,
+                                 <http://publications.europa.eu/resource/authority/data-theme/ENER> ,
+                                 <http://publications.europa.eu/resource/authority/data-theme/TRAN> ;
+    dcat:keyword                 "3D channel modeling"@en , "air-to-ground"@en , "spatial correlation"@en ,
+                                 "channel measurement"@en , "6G"@en , "coherence bandwidth"@en ,
+                                 "wireless propagation"@en , "A2G"@en , "channel stationarity"@en ,
+                                 "urban air mobility"@en , "drone"@en , "RMS delay spread"@en ,
+                                 "frequency stationarity"@en , "Massive MIMO"@en ,
+                                 "UAV communications"@en , "beamforming"@en ,
+                                 "MaMIMO testbed"@en , "non-stationary channels"@en ,
+                                 "temporal stationarity"@en , "power delay profile"@en ,
+                                 "cellular UAV"@en , "unmanned aerial vehicle"@en ;
+    dcat:landingPage             <https://doi.org/10.48804/0IMQDF> ;
+
+    # --- Spatial & temporal coverage ---
+    dct:spatial                  <http://publications.europa.eu/resource/authority/country/BEL> ;
+    schema:geo                   [ rdf:type           schema:GeoCoordinates ;
+                                   schema:address     "KU Leuven Campus, Leuven, Belgium" ;
+                                   schema:latitude    "50.862" ;
+                                   schema:longitude   "4.686" ] ;
+    schema:spatialCoverage       "Leuven, Belgium - KU Leuven Campus Suburban Environment"@en ;
+    dct:temporal                 [ rdf:type        dct:PeriodOfTime ;
+                                   dcat:startDate  "2023-01-01"^^xsd:date ;
+                                   dcat:endDate    "2023-09-01"^^xsd:date ] ;
+
+    # --- Standards conformance ---
+    dct:conformsTo               <https://www.go-fair.org/fair-principles/> ;
+    dct:bibliographicCitation    "Colpaert, A., Cui, Z., Vinogradov, E., & Pollin, S. (2023). 3D Non-Stationary Channel Measurement and Analysis for MaMIMO-UAV Communications. arXiv preprint arXiv:2310.06579." ;
+    dct:relation                 <https://codeocean.com/capsule/0881566/tree/v1> ,
+                                 <https://arxiv.org/abs/2310.06579> ;
+    schema:citation              <https://arxiv.org/abs/2310.06579> ;
+
+    # --- Dataset series ---
+    dct:isPartOf                 [ rdf:type         dcat:DatasetSeries ;
+                                   dct:title        "KU Leuven UAV-MaMIMO Channel Measurement Series"@en ;
+                                   dct:description  "Series of datasets from KU Leuven research on UAV massive MIMO channel characterization"@en ] ;
+
+    # --- 6G-DALI specific ---
+    dali:snsProjectName          "6G-DALI" ;
+    dali:gdprCompliant           true^^xsd:boolean ;
+    dali:fairCompliant           true^^xsd:boolean ;
+
+    # --- GAIA-X ---
+    gax:containsPII              false^^xsd:boolean ;
+    gax:producedBy               <https://dataspace.6gdali.eu/participant/ku-leuven> ;
+
+    # --- Testbed context (CMT) ---
+    dali:testbedContext          [
+        rdf:type                         dali:TestbedContext ;
+        dali:underlayPlatform            <https://www.esat.kuleuven.be/wavecore/> ;
+        dali:environment                 "urban" ;
+        dali:networkDomain               "RAN" ;
+        dali:ran3gppRelease              "Release 15" ;
+        dali:ranFocusedTechnology        "No_focus" ;
+        dali:ranCoverageType             "Single_Macro" ;
+        dali:ranFrequencyBand            "Sub-6GHz" ;
+        dali:ranMaxEndDevices            1 ;
+        dali:ranMobilityModel            "UAV" ;
+        dali:observationPointHorizontal  "End device to Access" ;
+        dali:observationPointVertical    "Radio Level" ;
+        dali:measurementFamily           "L1M" ;
+        dali:measurementTool             "MaMIMO testbed (custom 64-antenna), GPS-synchronized drone" ;
+    ] ;
+
+    # --- Measured variables ---
+    schema:variableMeasured      "Channel State Information (CSI), Power Delay Profiles (PDP), Spatial Correlation Matrices"@en ;
+    schema:measurementTechnique  "OFDM-based channel sounding using 64-antenna MaMIMO testbed with GPS-synchronized drone-mounted user equipment"@en ;
+
+    # --- Provenance ---
+    dct:provenance               [ rdf:type    dct:ProvenanceStatement ;
+                                   rdfs:label  "Collected by KU Leuven WaveCoRE MaMIMO testbed during a UAV measurement campaign at KU Leuven Campus, Leuven, Belgium. Data uploaded to the 6G-DALI Data Space."@en ] ;
+    prov:wasAttributedTo         <https://dataspace.6gdali.eu/participant/ku-leuven> ;
+
+    # --- Funding ---
+    schema:funding               [ rdf:type           schema:Grant ;
+                                   schema:funder      "EU Horizon Europe Research and Innovation Programme" ;
+                                   schema:identifier  "101139291" ;
+                                   schema:name        "iSEE-6G Project" ] ;
+    schema:funding               [ rdf:type           schema:Grant ;
+                                   schema:funder      "FWO" ;
+                                   schema:identifier  "G098020N" ;
+                                   schema:name        "Research Foundation Flanders (FWO)" ] ;
+
+    # --- Schema.org additional fields ---
+    schema:about                 "3D non-stationary channel measurements for UAV-to-ground massive MIMO communications featuring comprehensive stationarity analysis in space, time, and frequency domains. Measurements conducted at multiple UAV altitudes with 64-antenna base station and drone-mounted user equipment."@en ;
+    schema:applicationCategory   "Urban Air Mobility" , "6G Research" , "Massive MIMO" ,
+                                 "Wireless Propagation" , "UAV Communications" , "Channel Modeling" ;
+    schema:description           "Novel stationary angle metric introduced for MaMIMO beam tracking. Stationary distance ranges 2.2-3.6m, stationary angle 8.7-11.5°. Higher altitude UAVs show increased channel stability. Comprehensive space-time-frequency stationarity characterization for physical layer design."@en ;
+    schema:datePublished         "2023-10-10"^^xsd:date ;
+    schema:isAccessibleForFree   true ;
+    schema:isRelatedTo           "Massive MIMO Channel Measurement Data Set for Localization and Communication"@en ;
+    schema:url                   <https://doi.org/10.48804/0IMQDF> ;
+
+    # --- Distributions ---
+    dcat:byteSize                "several GB" ;
+    dcat:distribution            <https://dataspace.6gdali.eu/set/distribution/7e45dc0b-c026-4079-9669-58ab26e298af> ,
+                                 <https://dataspace.6gdali.eu/set/distribution/496e7a7c-9c90-4e9e-98f2-022f4fd76d3b> ,
+                                 <https://dataspace.6gdali.eu/set/distribution/c57155f5-9bbe-46ee-b11f-6a7d6de5b355> .
+
+
+<https://dataspace.6gdali.eu/set/distribution/7e45dc0b-c026-4079-9669-58ab26e298af>
+    rdf:type            dcat:Distribution ;
+    dct:title           "Channel State Information Data"@en ;
+    dct:description     "Raw CSI measurements and processed channel characteristics data"@en ;
+    dct:format          <http://publications.europa.eu/resource/authority/file-type/BIN> ;
+    dct:license         <https://creativecommons.org/licenses/by/4.0/> ;
+    dcat:accessURL      <https://dataspace.6gdali.eu/set/data/dali-dataset-3> ;
+    dcat:mediaType      "application/octet-stream" ;
+    schema:description  "Binary files containing 64×1 CSI frequency response vectors for 100 frequency bins"@en .
+
+<https://dataspace.6gdali.eu/set/distribution/496e7a7c-9c90-4e9e-98f2-022f4fd76d3b>
+    rdf:type            dcat:Distribution ;
+    dct:title           "Primary Dataset Portal"@en ;
+    dct:description     "Complete UAV MaMIMO channel measurement dataset with 3D stationarity analysis"@en ;
+    dct:format          <http://publications.europa.eu/resource/authority/file-type/HTML> ;
+    dct:license         <https://creativecommons.org/licenses/by/4.0/> ;
+    dcat:accessURL      <https://dataspace.6gdali.eu/set/data/dali-dataset-3> ;
+    dcat:mediaType      "text/html" ;
+    schema:description  "Access to comprehensive channel measurement data including CSI matrices, power delay profiles, and stationarity metrics"@en .
+
+<https://dataspace.6gdali.eu/set/distribution/c57155f5-9bbe-46ee-b11f-6a7d6de5b355>
+    rdf:type            dcat:Distribution ;
+    dct:title           "Research Paper (arXiv)"@en ;
+    dct:description     "Detailed methodology and analysis paper describing the measurement campaign and results"@en ;
+    dct:format          <http://publications.europa.eu/resource/authority/file-type/PDF> ;
+    dct:license         <https://creativecommons.org/licenses/by/4.0/> ;
+    dcat:accessURL      <https://arxiv.org/abs/2310.06579> ;
+    dcat:downloadURL    <https://arxiv.org/pdf/2310.06579> ;
+    dcat:mediaType      "application/pdf" .
