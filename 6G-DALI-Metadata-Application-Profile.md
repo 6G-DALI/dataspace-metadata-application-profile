@@ -115,7 +115,7 @@ Resource lifecycle:
   2. DataOps reads data from Data Lake → runs transformations and quality checks
      → registers dcat:DataService in piveau-hub
      → registers derived dcat:Dataset (with prov:wasDerivedFrom) in piveau-hub
-     → adds dqv:QualityMeasurement annotations to datasets in piveau-hub
+     → adds dqv:QualityMeasurement annotations to the relevant distributions in piveau-hub
   3. MLOps reads processed data from Data Lake → trains models
      → registers mldcat:MLModel (with performance metrics) in piveau-hub
 ```
@@ -262,8 +262,8 @@ These fields capture the testbed infrastructure context and are represented usin
 
         # Infrastructure
         dali:underlayPlatform       <https://example.testbed.eu/platform> ;
-        dali:environment            "urban" ;           # indoors | urban | rural | mixed
-        dali:networkDomain          "RAN" ;             # RAN | Transport | CORE | E2E
+        dali:environment            "urban" ;           # indoors | urban | rural | mixed | factory | business_district
+        dali:networkDomain          "RAN" ;             # RAN | Transport | CORE | E2E | LAN | Internet
 
         # RAN parameters
         dali:ran3gppRelease         "Release 17" ;
@@ -309,8 +309,8 @@ These fields capture the testbed infrastructure context and are represented usin
 | Observation point (vertical) | `dali:observationPointVertical` | `Radio Level` \| `Network Layer` \| `Application Layer` \| `Compute Resource-level` \| `cross-layer` |
 | Measurement family | `dali:measurementFamily` | Values from 3GPP TS 28.552: `DRB` \| `RRC` \| `RRU` \| `L1M` \| `PEE` \| etc. (see CMT Annex 2) |
 | Measurement tools | `dali:measurementTool` | `"tcpdump"` \| `"Prometheus exporter"` \| etc. |
-| Measured metrics | `schema:variableMeasured` | Free text or structured; use one per metric: `"Throughput (Kbps)"` |
-| Measurement technique | `schema:measurementTechnique` | Description of the measurement method |
+
+> `schema:variableMeasured` and `schema:measurementTechnique` are **not** dataset-level fields — they are placed on each `dcat:Distribution` instead (§5.6), since the column list they describe is specific to one distribution's file, not the dataset as a whole. A dataset with multiple distributions (e.g. a CSV and a separate documentation file) may have different `schema:variableMeasured` values per distribution.
 
 ### 5.4 Data Provenance (PROV-O)
 
@@ -348,82 +348,67 @@ For datasets uploaded directly from testbeds:
 
 ### 5.5 Data Quality (W3C DQV and Great Expectations)
 
-Data quality is described using the **W3C Data Quality Vocabulary (DQV)** and can be populated from **Great Expectations** validation results.
+Data quality is described using the **W3C Data Quality Vocabulary (DQV)** and is populated automatically by the **6G-DALI DataOps validation pipeline**, which runs [Great Expectations](https://greatexpectations.io/) checks against each distribution's file and writes the results back to piveau as `dqv:hasQualityMeasurement` annotations **on that distribution** — not on the dataset. A dataset with several distributions gets independent quality measurements per distribution, matching whichever one was actually validated.
 
-#### 5.5.1 DQV Core Concepts
+#### 5.5.1 DQV Core Concepts Used
 
 | DQV Concept | Description |
 |---|---|
-| `dqv:QualityMeasurement` | A concrete measurement of a metric on a dataset |
-| `dqv:Metric` | The specific quality criterion being measured |
-| `dqv:Dimension` | A high-level quality aspect (Completeness, Accuracy, Timeliness, etc.) |
-| `dqv:QualityAnnotation` | A human or automated annotation of quality |
-| `dqv:QualityPolicy` | A set of rules/expectations the dataset should satisfy |
+| `dqv:QualityMeasurement` | A concrete result of running one expectation check against a distribution |
+| `dqv:isMeasurementOf` | Points to the expectation type IRI that was evaluated |
+| `dqv:value` | Boolean pass/fail result of the expectation (`"true"^^xsd:boolean` or `"false"^^xsd:boolean`) |
 
-#### 5.5.2 Recommended Quality Dimensions
+#### 5.5.2 Great Expectations Mapping to DQV
 
-| Dimension | `dqv:Dimension` URI | Description |
+| Great Expectations concept | DQV property | Notes |
 |---|---|---|
-| Completeness | `dali:dqv/completeness` | Proportion of non-null/non-missing values |
-| Accuracy | `dali:dqv/accuracy` | Correctness of values against reference |
-| Timeliness | `dali:dqv/timeliness` | Freshness of data relative to collection time |
-| Consistency | `dali:dqv/consistency` | Adherence to schema and value constraints |
-| Uniqueness | `dali:dqv/uniqueness` | Absence of duplicate records |
-| Validity | `dali:dqv/validity` | Conformance to defined formats and ranges |
+| Expectation type (e.g. `expect_column_values_to_not_be_null`) | `dqv:isMeasurementOf` | IRI: `dali:{expectation_type}` |
+| `success: true/false` | `dqv:value` | `"true"^^xsd:boolean` or `"false"^^xsd:boolean` |
+| Result details (element count, unexpected count, etc.) | `dct:description` | JSON-encoded string |
+| Validation run timestamp | `dct:date` | `xsd:dateTime` |
 
-#### 5.5.3 Great Expectations Mapping to DQV
+#### 5.5.3 Supported Expectation Types
 
-The following mapping translates Great Expectations concepts to DQV:
+The following Great Expectations checks are automatically generated from the distribution's `schema:variableMeasured` column list and applied during DataOps validation:
 
-| Great Expectations concept | DQV equivalent | Notes |
+| Expectation | `dqv:isMeasurementOf` IRI | What it checks |
 |---|---|---|
-| Expectation Suite | `dqv:QualityPolicy` | Named set of quality rules |
-| Expectation | `dqv:Metric` | Individual quality rule (e.g., `expect_column_values_to_not_be_null`) |
-| Validation Result | `dqv:QualityMeasurement` | Result of running expectations on data |
-| `observed_value` | `dqv:value` | Numeric value of the measurement |
-| `success: true/false` | `dqv:isMeasurementOf` + result annotation | Pass/fail outcome |
-| Data Docs HTML | `dqv:QualityAnnotation` body | Human-readable quality report |
+| `expect_table_row_count_to_be_between` | `dali:expect_table_row_count_to_be_between` | Dataset has at least 1 row |
+| `expect_column_to_exist` | `dali:expect_column_to_exist` | Each declared column is present in the file |
+| `expect_column_values_to_not_be_null` | `dali:expect_column_values_to_not_be_null` | Each declared column contains no null values |
 
-#### 5.5.4 RDF Pattern for Quality Annotations
+Additional expectations can be supplied explicitly at validation time.
+
+#### 5.5.4 RDF Pattern
+
+Each quality measurement is assigned a **stable URI** of the form `{distribution-uri}/quality/{expectation_type}` (or `{distribution-uri}/quality/{expectation_type}_{column}` for column-level checks), ensuring idempotent updates on repeated validation runs. The measurements are attached to the **distribution** that was validated (via its own `dqv:hasQualityMeasurement`), not the dataset — a `distribution_id` identifies which distribution a validation run targets when a dataset has more than one.
 
 ```turtle
-# Quality Policy (Great Expectations Suite)
-<https://dataspace.6gdali.eu/quality/suite/dataset-abc>
-    rdf:type                dqv:QualityPolicy ;
-    rdfs:label              "6G Dataset Quality Expectations"@en ;
-    dct:description         "Great Expectations suite for 5G/6G measurement datasets"@en ;
-    dct:creator             <https://dali-project.eu/participant/sparkworks> .
+PREFIX dali: <https://dali-project.eu/ns#>
+PREFIX dct:  <http://purl.org/dc/terms/>
+PREFIX dqv:  <http://www.w3.org/ns/dqv#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 
-# A quality measurement instance
-<https://dataspace.6gdali.eu/quality/measurement/dataset-abc/001>
+<https://dspace.sparkworks.net/set/distribution/6g-dali-staging-eur-experiment-001-dist-001>
+    dqv:hasQualityMeasurement
+        <.../quality/expect_table_row_count_to_be_between> ,
+        <.../quality/expect_column_to_exist_timestamp> ,
+        <.../quality/expect_column_values_to_not_be_null_timestamp> .
+
+<.../quality/expect_table_row_count_to_be_between>
     rdf:type                dqv:QualityMeasurement ;
-    dqv:isMeasurementOf     dali:metric/completeness-csi-column ;
-    dqv:computedOn          <dataset-uri> ;
-    dqv:value               "0.998"^^xsd:decimal ;
-    dct:date                "2025-06-01"^^xsd:date ;
-    prov:wasGeneratedBy     <https://dataspace.6gdali.eu/service/quality-checker> .
+    dqv:isMeasurementOf     dali:expect_table_row_count_to_be_between ;
+    dqv:value               "true"^^xsd:boolean ;
+    dct:description         "{\"min_value\": 1, \"observed_value\": 13000}" ;
+    dct:date                "2026-05-29T12:13:38Z"^^xsd:dateTime .
 
-# The metric definition
-dali:metric/completeness-csi-column
-    rdf:type                dqv:Metric ;
-    rdfs:label              "CSI column completeness"@en ;
-    dct:description         "Fraction of non-null values in the CSI measurement column (GE: expect_column_values_to_not_be_null)"@en ;
-    dqv:inDimension         dali:dqv/completeness ;
-    dqv:expectedDataType    xsd:decimal .
-
-# Attach quality annotations to the dataset
-<dataset-uri>
-    dqv:hasQualityMeasurement  <https://dataspace.6gdali.eu/quality/measurement/dataset-abc/001> ;
-    dqv:hasQualityAnnotation   [
-        rdf:type            dqv:QualityAnnotation ;
-        oa:hasBody          <https://dataspace.6gdali.eu/quality/report/dataset-abc.html> ;
-        oa:motivatedBy      dqv:qualityAssessment ;
-        dct:date            "2025-06-01"^^xsd:date ;
-        rdfs:comment        "Validation passed: 99.8% completeness. 2 rows with null CSI values flagged."@en
-    ] .
+<.../quality/expect_column_values_to_not_be_null_timestamp>
+    rdf:type                dqv:QualityMeasurement ;
+    dqv:isMeasurementOf     dali:expect_column_values_to_not_be_null ;
+    dqv:value               "true"^^xsd:boolean ;
+    dct:description         "{\"column\": \"timestamp\", \"element_count\": 13000, \"unexpected_count\": 0, \"unexpected_percent\": 0.0}" ;
+    dct:date                "2026-05-29T12:13:38Z"^^xsd:dateTime .
 ```
-
-> **Note:** The `oa:` prefix is `http://www.w3.org/ns/oa#` (W3C Web Annotation Vocabulary), used by DQV for quality annotations.
 
 ### 5.6 Distribution Metadata
 
@@ -444,6 +429,11 @@ Each `dcat:Dataset` must have at least one `dcat:Distribution`. A distribution d
 | Encoding format | `dcat:packageFormat` | O | Encoding format (e.g., `UTF-8`). |
 | Conformance | `dct:conformsTo` | O | Data standard or schema the distribution conforms to. |
 | Availability | `dcatap:availability` | R | Expected availability (`dcatap:STABLE`, `dcatap:AVAILABLE`, etc.). |
+| Measured metrics | `schema:variableMeasured` | R | Column names present in this distribution's file; one triple per column. Drives auto-generated DataOps quality checks (§5.5.3). |
+| Measurement technique | `schema:measurementTechnique` | O | Description of the measurement method used to produce this distribution's data. |
+| Quality measurements | `dqv:hasQualityMeasurement` | — (system-generated) | Populated automatically by the DataOps validation pipeline after validating this distribution (§5.5). |
+| Asset ID | `dali:assetId` | R | Identifies the underlying file/asset (e.g. an EDC asset ID, or a Data Lake object basename). **Not** the same as the distribution's own resource identifier/URI — this is what DataOps resolves the Data Lake object key from (`{assetId}.{extension}`, extension from `dcat:mediaType`), so it must match whatever the file is actually stored under. |
+| Connector type | `dali:connectorType` | O | How this distribution is served, e.g. `"dspaceconnector"` when access goes through a 6G-DALI/EDC data-space connector rather than a direct static file link. When set, `dcat:accessURL` is a connector endpoint requiring negotiation, not a directly downloadable file — only `dcat:downloadURL`, if present, can be offered as a direct download. |
 
 ---
 
@@ -666,7 +656,7 @@ Sub-catalogues may be created per testbed or partner organisation using `dcat:Ca
 | Observation point (V) | Content-C | `dali:observationPointVertical` |
 | Measurement family | Content-C | `dali:measurementFamily` |
 | Measurement tools | Content-C | `dali:measurementTool` |
-| Measured indicators | Content-C | `schema:variableMeasured` |
+| Measured indicators | Content-C | `schema:variableMeasured` (on the dataset's `dcat:Distribution`, not the dataset itself — see §5.6) |
 
 ### 9.2 MRS Slices_V0_2 → DCAT-AP Field Mapping
 
@@ -723,7 +713,7 @@ The following matrix summarises which fields are required for each resource type
 | `dali:fairCompliant` | **M** | — | — |
 | `dali:snsProjectName` | **M** | — | — |
 | `dali:testbedContext` | R | — | — |
-| `dqv:hasQualityMeasurement` | R | — | R |
+| `dqv:hasQualityMeasurement` | — (on Distribution, R) | — | R |
 | `prov:wasDerivedFrom` | R* | — | — |
 | `mldcat:mlModelType` | — | — | **M** |
 | `mldcat:mlTask` | — | — | **M** |
@@ -847,10 +837,6 @@ PREFIX dali:   <https://dali-project.eu/ns#>
         dali:measurementTool        "Prometheus exporter", "tcpdump" ;
     ] ;
 
-    # --- Measured Variables ---
-    schema:variableMeasured      "Throughput (Mbps)", "Latency (ms)", "RSRP (dBm)", "SINR (dB)" ;
-    schema:measurementTechnique  "Prometheus-based 5G NR KPI monitoring with 1s scrape interval"@en ;
-
     # --- Provenance ---
     dct:provenance               [ rdf:type   dct:ProvenanceStatement ;
                                    rdfs:label "Collected via automated AF-MRS export. Experiment ID: 351. Raw data from eBOS database."@en ] ;
@@ -861,9 +847,6 @@ PREFIX dali:   <https://dali-project.eu/ns#>
                                    schema:funder      "EU Horizon Europe" ;
                                    schema:identifier  "101000000" ;
                                    schema:name        "6G-DALI Project" ] ;
-
-    # --- Quality ---
-    dqv:hasQualityMeasurement    <https://dataspace.6gdali.eu/quality/measurement/a1b2c3d4/completeness> ;
 
     # --- Distributions ---
     dcat:byteSize                "524288000"^^xsd:nonNegativeInteger ;
@@ -880,7 +863,15 @@ PREFIX dali:   <https://dali-project.eu/ns#>
     dcat:accessURL      <https://datalake.dali-project.eu/datasets/a1b2c3d4/data.csv> ;
     dcat:downloadURL    <https://datalake.dali-project.eu/datasets/a1b2c3d4/data.csv> ;
     dcat:mediaType      "text/csv" ;
-    dcat:byteSize       "524288000"^^xsd:nonNegativeInteger .
+    dcat:byteSize       "524288000"^^xsd:nonNegativeInteger ;
+    dali:assetId        "dist-001" ;
+
+    # --- Measured Variables (moved here from the dataset — see §5.3.E note) ---
+    schema:variableMeasured      "Throughput (Mbps)", "Latency (ms)", "RSRP (dBm)", "SINR (dB)" ;
+    schema:measurementTechnique  "Prometheus-based 5G NR KPI monitoring with 1s scrape interval"@en ;
+
+    # --- Quality (populated by the DataOps validation pipeline, §5.5) ---
+    dqv:hasQualityMeasurement    <https://dataspace.6gdali.eu/set/distribution/dist-001/quality/expect_table_row_count_to_be_between> .
 
 # Distribution 2 — Data documentation
 <https://dataspace.6gdali.eu/set/distribution/dist-002>
@@ -1077,6 +1068,44 @@ All metadata records should be validated against:
 - **DCAT-AP 3.0 SHACL shapes** — available from the SEMIC SHACL validator
 - **6G-DALI SHACL profile** — the layered shapes described in Section 11.6 (to be defined as a project deliverable)
 - **MLDCAT-AP SHACL shapes** — for ML model records
+
+---
+
+## 12. Long-Term Persistence of References and Links
+
+The IRIs, namespace URIs, and catalogue endpoints defined in this profile are tied to project infrastructure that will eventually be decommissioned. This section defines the plan to ensure that all references remain resolvable and all datasets remain accessible after the 6G-DALI project ends.
+
+### 12.1 Persistent Identifiers for Datasets
+
+All datasets registered in the 6G-DALI catalogue will be assigned a **DOI** (via [Zenodo](https://zenodo.org)) as their canonical persistent identifier. The `dct:identifier` field on every `dcat:Dataset` record must carry this DOI in addition to the internal UUID.
+
+The `dataspace.6gdali.eu` IRIs (e.g., `https://dataspace.6gdali.eu/set/data/{uuid}`) serve as resolvable access points during the active project lifetime. The DOI is the long-term identifier and remains resolvable independently of the project infrastructure. All cross-system links (piveau-hub ↔ MRS ↔ GAIA-X) that currently use the `dataspace.6gdali.eu` IRI should additionally record the DOI in `dct:identifier` so that downstream systems can re-anchor to the persistent identifier after project closure.
+
+### 12.2 Namespace URI Persistence
+
+The `dali:` namespace (`https://dali-project.eu/ns#`) will be registered as a redirect through **[w3id.org](https://w3id.org)** — a community-maintained persistent URI service operated under W3C auspices and specifically designed for long-term stability of semantic web vocabularies. The redirect can be maintained indefinitely by any contributor after the project ends, fully decoupling namespace resolution from the `dali-project.eu` domain and its lifecycle.
+
+Once registered, all occurrences of `PREFIX dali: <https://dali-project.eu/ns#>` in RDF records and SHACL shapes will be updated to `PREFIX dali: <https://w3id.org/6g-dali/ns#>`, with an HTTP 301 redirect in place from the old URI to ensure backward compatibility.
+
+### 12.3 Catalogue and Data Continuity
+
+Three complementary measures ensure catalogue continuity beyond the project:
+
+**Static RDF archive:** A complete, versioned dump of the piveau-hub catalogue — all `dcat:Dataset`, `dcat:DataService`, `mldcat:MLModel`, and `dqv:QualityMeasurement` records in RDF Turtle — will be deposited in Zenodo at project end as a citable, immutable archive. This ensures the full metadata corpus remains publicly accessible even if the live catalogue instance is taken offline.
+
+**SNS-JU federation handover:** The 6G-DALI catalogue will be offered for integration into the broader SNS-JU data space federation, consistent with the cross-project dataset hub strategy established in 6G-DARWIN. Under this arrangement, dataset metadata and access rights transfer to a long-term SNS-JU hosting arrangement without requiring re-registration by data providers.
+
+**MAP specification archival:** This document (the 6G-DALI Metadata Application Profile) will be published with a DOI on Zenodo at each major version milestone, ensuring the specification itself is permanently citable and accessible independent of the project repository.
+
+### 12.4 Summary
+
+| Asset | Current location | Long-term persistence mechanism |
+|---|---|---|
+| Dataset/model/service IRIs | `dataspace.6gdali.eu` | DOI (Zenodo) as canonical identifier |
+| `dali:` namespace | `dali-project.eu/ns#` | w3id.org persistent redirect |
+| Catalogue metadata | piveau-hub instance | Zenodo RDF dump + SNS-JU federation handover |
+| MAP specification | Project repository | Zenodo DOI per major version |
+| Dataset files | 6G-DALI Data Lake | Zenodo deposit + SNS-JU storage handover |
 
 ---
 

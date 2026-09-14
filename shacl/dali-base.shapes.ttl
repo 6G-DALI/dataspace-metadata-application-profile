@@ -361,9 +361,9 @@ dali:TestbedContextShape
         sh:name     "Environment" ;
         sh:minCount 1 ;
         sh:datatype xsd:string ;
-        sh:in       ( "indoors" "urban" "rural" "mixed" ) ;
+        sh:in       ( "indoors" "urban" "rural" "mixed" "factory" "business_district" ) ;
         sh:severity sh:Violation ;
-        sh:message  "dali:environment is mandatory. Allowed values: indoors, urban, rural, mixed."@en ;
+        sh:message  "dali:environment is mandatory. Allowed values: indoors, urban, rural, mixed, factory, business_district."@en ;
     ] ;
 
     sh:property [
@@ -371,9 +371,9 @@ dali:TestbedContextShape
         sh:name     "Network domain" ;
         sh:minCount 1 ;
         sh:datatype xsd:string ;
-        sh:in       ( "RAN" "Transport" "CORE" "E2E" ) ;
+        sh:in       ( "RAN" "Transport" "CORE" "E2E" "LAN" "Internet" ) ;
         sh:severity sh:Violation ;
-        sh:message  "dali:networkDomain is mandatory. Allowed values: RAN, Transport, CORE, E2E."@en ;
+        sh:message  "dali:networkDomain is mandatory. Allowed values: RAN, Transport, CORE, E2E, LAN, Internet."@en ;
     ] ;
 
     sh:property [

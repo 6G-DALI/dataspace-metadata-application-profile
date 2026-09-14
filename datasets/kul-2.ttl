@@ -100,11 +100,11 @@ PREFIX dali:   <https://dali-project.eu/ns#>
 
     # --- 6G-DALI specific ---
     dali:snsProjectName          "6G-DALI" ;
-    dali:gdprCompliant           true^^xsd:boolean ;
-    dali:fairCompliant           true^^xsd:boolean ;
+    dali:gdprCompliant           "true"^^xsd:boolean ;
+    dali:fairCompliant           "true"^^xsd:boolean ;
 
     # --- GAIA-X ---
-    gax:containsPII              false^^xsd:boolean ;
+    gax:containsPII              "false"^^xsd:boolean ;
     gax:producedBy               <https://dataspace.6gdali.eu/participant/ku-leuven> ;
 
     # --- Testbed context (CMT) ---
@@ -121,7 +121,7 @@ PREFIX dali:   <https://dali-project.eu/ns#>
         dali:ranMaxEndDevices            43 ;
         dali:ranMobilityModel            "static" ;
         dali:computeOrchestratorType     "None" ;
-        dali:computeGpuUse               false^^xsd:boolean ;
+        dali:computeGpuUse               "false"^^xsd:boolean ;
         dali:observationPointHorizontal  "End device to Access" ;
         dali:observationPointVertical    "Radio Level" ;
         dali:measurementFamily           "L1M" ;

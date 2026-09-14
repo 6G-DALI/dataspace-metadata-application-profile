@@ -125,7 +125,7 @@ dali:fairCompliant
 dali:environment
     rdf:type            owl:DatatypeProperty ;
     rdfs:label          "environment"@en ;
-    rdfs:comment        "Physical environment in which the measurements were collected. Allowed values: indoors, urban, rural, mixed."@en ;
+    rdfs:comment        "Physical environment in which the measurements were collected. Allowed values: indoors, urban, rural, mixed, factory, business_district."@en ;
     rdfs:domain         dali:TestbedContext ;
     rdfs:range          xsd:string ;
     rdfs:seeAlso        dali:EnvironmentScheme ;
@@ -134,7 +134,7 @@ dali:environment
 dali:networkDomain
     rdf:type            owl:DatatypeProperty ;
     rdfs:label          "network domain"@en ;
-    rdfs:comment        "The network infrastructure domain(s) involved. Allowed values: RAN, Transport, CORE, E2E."@en ;
+    rdfs:comment        "The network infrastructure domain(s) involved. Allowed values: RAN, Transport, CORE, E2E, LAN, Internet."@en ;
     rdfs:domain         dali:TestbedContext ;
     rdfs:range          xsd:string ;
     rdfs:seeAlso        dali:NetworkDomainScheme ;
@@ -467,10 +467,12 @@ dali:EnvironmentScheme
     skos:prefLabel  "6G-DALI Environment Types"@en ;
     dct:description "Allowed values for dali:environment."@en .
 
-dali:env-indoors   rdf:type skos:Concept ; skos:prefLabel "indoors"@en   ; skos:inScheme dali:EnvironmentScheme ; skos:notation "indoors" .
-dali:env-urban     rdf:type skos:Concept ; skos:prefLabel "urban"@en     ; skos:inScheme dali:EnvironmentScheme ; skos:notation "urban" .
-dali:env-rural     rdf:type skos:Concept ; skos:prefLabel "rural"@en     ; skos:inScheme dali:EnvironmentScheme ; skos:notation "rural" .
-dali:env-mixed     rdf:type skos:Concept ; skos:prefLabel "mixed"@en     ; skos:inScheme dali:EnvironmentScheme ; skos:notation "mixed" .
+dali:env-indoors           rdf:type skos:Concept ; skos:prefLabel "indoors"@en           ; skos:inScheme dali:EnvironmentScheme ; skos:notation "indoors" .
+dali:env-urban             rdf:type skos:Concept ; skos:prefLabel "urban"@en             ; skos:inScheme dali:EnvironmentScheme ; skos:notation "urban" .
+dali:env-rural             rdf:type skos:Concept ; skos:prefLabel "rural"@en             ; skos:inScheme dali:EnvironmentScheme ; skos:notation "rural" .
+dali:env-mixed             rdf:type skos:Concept ; skos:prefLabel "mixed"@en             ; skos:inScheme dali:EnvironmentScheme ; skos:notation "mixed" .
+dali:env-factory           rdf:type skos:Concept ; skos:prefLabel "factory"@en           ; skos:inScheme dali:EnvironmentScheme ; skos:notation "factory" .
+dali:env-business-district rdf:type skos:Concept ; skos:prefLabel "business district"@en ; skos:inScheme dali:EnvironmentScheme ; skos:notation "business_district" .
 
 # --- Network Domain ---
 
@@ -483,6 +485,8 @@ dali:nd-ran        rdf:type skos:Concept ; skos:prefLabel "RAN"@en       ; skos:
 dali:nd-transport  rdf:type skos:Concept ; skos:prefLabel "Transport"@en ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "Transport" .
 dali:nd-core       rdf:type skos:Concept ; skos:prefLabel "CORE"@en      ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "CORE" .
 dali:nd-e2e        rdf:type skos:Concept ; skos:prefLabel "E2E"@en       ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "E2E" .
+dali:nd-lan        rdf:type skos:Concept ; skos:prefLabel "LAN"@en       ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "LAN" .
+dali:nd-internet   rdf:type skos:Concept ; skos:prefLabel "Internet"@en  ; skos:inScheme dali:NetworkDomainScheme ; skos:notation "Internet" .
 
 # --- New Radio Type ---
 

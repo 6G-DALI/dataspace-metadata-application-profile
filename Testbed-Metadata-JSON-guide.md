@@ -1,6 +1,6 @@
 # 6G-DALI Dataset Metadata File Guide
 
-**Version:** 1.0  
+**Version:** 1.1  
 **For:** Testbed owners preparing dataset metadata for the 6G-DALI Data Space  
 **Platform:** piveau-hub (DCAT-AP 3.0 compliant)
 
@@ -35,6 +35,9 @@ The `metadata.json` file must be sent **before or alongside** the CSV data files
 | `identifier` | O | string | Explicit unique identifier (UUID or DOI). If omitted, the dataset directory name is used |
 | `issued` | **M** | string | Date first published. Format: `YYYY-MM-DD` |
 | `version` | O | string | Version label (e.g. `"1.0"`) |
+| `spatial` | R | string | Geographic coverage, free text (e.g. `"Athens, Greece"`) |
+| `temporal_start` | R | string | Start of the period the data covers. Format: `YYYY-MM-DD`. Only emitted together with `temporal_end` |
+| `temporal_end` | R | string | End of the period the data covers. Format: `YYYY-MM-DD` |
 
 > **Note:** `issued` must be in `YYYY-MM-DD` format. Datetime strings with timestamps are not accepted.  
 > `dct:modified` is automatically set to the same value as `issued` on initial registration.
@@ -47,6 +50,10 @@ The `metadata.json` file must be sent **before or alongside** the CSV data files
 |-------|-----------|------|---------|-------------|
 | `license` | **M** | string (URI) | `https://creativecommons.org/licenses/by/4.0/` | License URI. Use a standard license URI (see examples below) |
 | `access_rights` | **M** | string | `PUBLIC` | Access condition code from the EU Access Right vocabulary. Values: `PUBLIC`, `RESTRICTED`, `NON_PUBLIC` |
+| `gdpr_compliant` | **M** | boolean | `true` | Owner's statement that the dataset complies with GDPR (SNS-JU CMT requirement) |
+| `fair_compliant` | **M** | boolean | `true` | Owner's statement that the dataset follows the FAIR principles |
+| `contains_pii` | **M** | boolean | `false` | Whether the data contains personally identifiable information (GAIA-X `containsPII`) |
+| `exposed_through` | O | string (URI) | — | URI of the data space endpoint the dataset is served through (GAIA-X `exposedThrough`). Normally left to the platform |
 
 **Common license URIs:**
 
@@ -77,6 +84,11 @@ The `metadata.json` file must be sent **before or alongside** the CSV data files
 | `publisher` | R | string | Name of the organisation publishing the dataset |
 | `creator_name` | R | string | Full name of the person or team that created the dataset |
 | `creator_email` | R | string | E-mail address of the creator |
+| `creator_kind` | O | string | `Person` (default) or `Organization` — whether the creator is a named researcher or the institution itself |
+| `creator_orcid` | O | string | Creator's ORCID, bare (`0000-0002-1825-0097`) or as a URL |
+| `creator_affiliation` | O | string | Creator's institution |
+| `contributors` | O | array of strings | Names of further contributors (CMT "List of Contributors") |
+| `related_publications` | O | array of strings (URI) | DOI / arXiv URIs of publications describing the dataset |
 | `contact_email` | R | string | Contact e-mail for dataset enquiries |
 | `produced_by` | R | string (URI) | URI of your organisation as a GAIA-X participant in the 6G-DALI Data Space. Contact the platform administrator for your URI |
 
@@ -118,7 +130,7 @@ The `testbed_context` object captures your testbed infrastructure and experiment
 | `ran_split` | string | `DU-RU split` · `No-Split` · `CU-DU split` |
 | `ran_focused_technology` | string | `O-RAN` · `JSAC` · `RIC` · `No_focus` |
 | `ran_coverage_type` | string | `Single_Macro` · `Single_Micro` · `Multicell_setup` |
-| `ran_frequency_band` | string | `"n78"` · `"n77"` · `"n28"` · `"B3"` etc. |
+| `ran_frequency_band` | array of strings | `["n78"]` · `["n77", "n28"]` etc. — repeatable; a single string is also accepted |
 | `ran_bandwidth_mhz` | integer | `20` · `50` · `100` |
 | `ran_max_end_devices` | integer | e.g. `10` |
 | `ran_mobility_model` | string | `static` · `pedestrian` · `vehicular` · `UAV` |
@@ -159,14 +171,23 @@ The `testbed_context` object captures your testbed infrastructure and experiment
   "description": "5G NR QoS measurement dataset collected in an urban macro-cell environment. Contains per-gNB KPI time-series exported via Prometheus.",
   "issued": "2025-11-24",
   "version": "1.0",
+  "spatial": "Sophia Antipolis, France",
+  "temporal_start": "2025-10-01",
+  "temporal_end": "2025-10-31",
 
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "access_rights": "PUBLIC",
+  "gdpr_compliant": true,
+  "fair_compliant": true,
+  "contains_pii": false,
 
   "publisher": "EURECOM",
   "creator_name": "EURECOM 5G Lab",
+  "creator_kind": "Organization",
   "creator_email": "5glab@eurecom.fr",
   "contact_email": "5glab@eurecom.fr",
+  "contributors": ["Jane Doe", "John Roe"],
+  "related_publications": ["https://doi.org/10.1000/example"],
   "produced_by": "https://dali-project.eu/participant/eurecom",
 
   "sns_project_name": "6G-DALI",
@@ -193,7 +214,7 @@ The `testbed_context` object captures your testbed infrastructure and experiment
     "network_domain": "RAN",
     "ran_3gpp_release": "Release 17",
     "ran_nr_type": "NR-SA",
-    "ran_frequency_band": "n78",
+    "ran_frequency_band": ["n78"],
     "ran_bandwidth_mhz": 100,
     "ran_max_end_devices": 10,
     "ran_mobility_model": "static",
@@ -221,6 +242,9 @@ The `testbed_context` object captures your testbed infrastructure and experiment
   "license": "https://creativecommons.org/licenses/by/4.0/",
 
   "access_rights": "PUBLIC",
+  "gdpr_compliant": true,
+  "fair_compliant": true,
+  "contains_pii": false,
   "sns_project_name": "6G-DALI"
 }
 ```
@@ -234,3 +258,12 @@ The `testbed_context` object captures your testbed infrastructure and experiment
 - **`produced_by`**: contact the 6G-DALI platform administrator to obtain the correct URI for your organisation.
 - **`testbed_context`**: the entire object is optional. If provided, include only the fields you have values for — unknown or missing fields are simply omitted from the catalogue record.
 - **`keywords`**: use English language tags wherever possible to maximise discoverability across the federated catalogue.
+- **Compliance flags**: `gdpr_compliant`, `fair_compliant` and `contains_pii` are always written to the record (they are mandatory in the Metadata Application Profile). Their defaults are `true` / `true` / `false` — if any of those is not true for your dataset, set it explicitly.
+- **Field names**: keys are `snake_case` as shown; `camelCase` spellings (`accessRights`, `testbedContext`, ...) are accepted as aliases. Unknown keys are ignored.
+
+---
+
+## Changelog
+
+- **1.1** — aligned with the Metadata Application Profile and the DataOps UI dataset form: added `gdpr_compliant`, `fair_compliant`, `contains_pii`, `exposed_through`, `spatial`, `temporal_start`/`temporal_end`, `creator_kind`, `creator_orcid`, `creator_affiliation`, `contributors`, `related_publications`; `ran_frequency_band` is now a list.
+- **1.0** — initial version.
