@@ -20,7 +20,7 @@ The testbed operator's responsibilities are small:
 
 1. Deploy the connector stack from the bundle the administrator provides (connector, Postgres, S3-compatible store) (§4).
 2. Make the connector reachable by the 6G-DALI Data Space connector: over the internet through a TLS reverse proxy (§5).
-3. Register the testbed's dataset bucket as an asset on the connector, using the connector's asset page (§4.3).
+3. Register the testbed's dataset bucket as an asset on the connector, using the Testbed asset panel on the connector's catalogue page (§4.3).
 4. Drop each dataset into its bucket as `<dataset>/metadata.json` plus one or more **CSV (or other format)** data files.
 
 Everything after that is automated. The 6G-DALI Data Space connector transfers the files into the data lake. The central platform then registers each dataset and file in the catalogue and as EDC assets. The testbed's own broker is told when each file has been transferred.
@@ -63,7 +63,7 @@ Currently integrated testbeds:
 
 | Component | Role |
 |---|---|
-| **Testbed connector** | EDC provider built from `ghcr.io/6g-dali/6gdali-testbed-connector`. It exposes the testbed's bucket as an EDC asset and carries 6G-DALI's data-sink extension, which writes the transferred files to the central data lake. It also serves the asset page where the operator registers the bucket (§4.3). It does not talk to the catalogue. |
+| **Testbed connector** | EDC provider built from `ghcr.io/6g-dali/6gdali-testbed-connector`. It exposes the testbed's bucket as an EDC asset and carries 6G-DALI's data-sink extension, which writes the transferred files to the central data lake. It also serves the catalogue page, whose Testbed asset panel is where the operator registers the bucket's asset (§4.3). It does not talk to the catalogue. |
 | **S3-compatible store** | Holds the testbed's datasets. |
 | **6G-DALI Data Space connector** | The EDC connector that acts as consumer. It negotiates contracts and receives transfers. |
 | **DataOps UI and orchestrator** | The administrators' control plane. The orchestrator keeps the testbed registry in its own Postgres database, provisions each testbed's bucket, Data Lake key and catalogue, generates the connector bundle, and uses the Data Space connector to find the testbed's asset, negotiate the contract and start the transfer. |
@@ -87,7 +87,7 @@ The **platform administrator**, in the DataOps UI (Testbeds):
 The **testbed operator**:
 
 4. **Deploys the connector stack** from the bundle (§4) and **makes it reachable** by the 6G-DALI Data Space connector over the internet (§5).
-5. **Registers the bucket as an asset** on the connector, on its asset page (§4.3). This creates three things on the connector: an asset with a `6GDaliTestbedExperiments` data address pointing at the bucket, a `no-constraint-policy`, and a contract definition that offers every asset under that policy.
+5. **Registers the bucket as an asset** on the connector, in the Testbed asset panel of its catalogue page (§4.3). This creates three things on the connector: an asset with a `6GDaliTestbedExperiments` data address pointing at the bucket, a `no-constraint-policy`, and a contract definition that offers every asset under that policy.
 
 The **platform administrator** then connects it, from the testbed's page in the DataOps UI:
 
@@ -99,7 +99,7 @@ The transfer is long-lived. It stays `STARTED` and keeps polling the bucket, so 
 
 The Data Lake key never reaches the testbed. The Data Space connector supplies it, in the destination of the transfer request, and the testbed's data plane uses it only to write into the testbed's own bucket. For this reason the connector properties contain no Data Lake credentials.
 
-The preparation scripts used before (`0-prepare_provider_*` and `1-prepare-contract_*`) are no longer needed for a new testbed: the asset page and the DataOps UI replace them.
+The preparation scripts used before (`0-prepare_provider_*` and `1-prepare-contract_*`) are no longer needed for a new testbed: the Testbed asset panel and the DataOps UI replace them.
 
 ### 3.2 Per-dataset flow (steady state)
 
@@ -146,7 +146,7 @@ Each testbed connector runs as its own Docker Compose stack:
 
 | Port | API | Path |
 |---|---|---|
-| 18190 | Default / observability, and the connector's catalogue and asset pages | `/api` (health: `/api/check/health`) |
+| 18190 | Default / observability, and the connector's catalogue page | `/api` (health: `/api/check/health`) |
 | 18191 | Management (not published to the internet) | `/management` |
 | 18192 | DSP (other connectors connect here) | `/protocol` |
 
@@ -157,7 +157,7 @@ Each testbed connector runs as its own Docker Compose stack:
 | `edc.participant.id` / `edc.ids.id` | Identity of this participant in the data space, assigned by the registry (for example `provider-kul`). Do not change them. |
 | `edc.dsp.callback.address` | Address other connectors use to call back. Use the URL the Data Space connector can reach, for example `https://edc.<testbed>.6gdali.eu/protocol` (§5). |
 | `edc.experiment.prefix` | Prefix for experiment IDs and the central data-lake bucket, assigned by the registry. |
-| `edc.catalog.ui.asset.admin.key` | The key that unlocks the asset page (§4.3). Without it the page is disabled. |
+| `edc.catalog.ui.asset.admin.key` | The key that unlocks the Testbed asset panel on the catalogue page (§4.3). Without it the panel is not shown. |
 | `edc.rabbitmq.host` / `.port` / `.username` / `.password` / `.queue` | The testbed's own broker, where transfer-completion messages are published. Optional. |
 | `edc.catalog.ui.submit.enabled` | Enables dataset submission from the connector's built-in catalogue UI (off by default). |
 
@@ -174,13 +174,21 @@ curl -s http://localhost:18190/api/check/health
 
 Config is mounted as a compose `config`, so changes need `docker compose up -d` (recreate), not just a restart.
 
-### 4.3 Registering the dataset asset
+### 4.3 Registering the testbed asset
 
-The connector's management API is not published, so the operator registers the bucket on the connector's own asset page:
+The connector's management API is not published, so the operator manages the testbed's asset on the connector's own catalogue page. A testbed has a **single asset**: the dataset bucket it offers to the data space.
 
-1. Open `https://<connector-domain>/api/catalog/register-asset` (or `http://localhost:18190/api/catalog/register-asset` on the host).
-2. Enter the **admin key**: the value of `edc.catalog.ui.asset.admin.key` in the properties file. The page answers 404 when no key is configured.
-3. Fill in the asset:
+1. Open the catalogue page, `https://<connector-domain>/api/catalog` (or `http://localhost:18190/api/catalog` on the host), and click the **Testbed asset** card. The card is only shown when `edc.catalog.ui.asset.admin.key` is set in the properties file.
+2. Enter the **admin key**: the value of `edc.catalog.ui.asset.admin.key`.
+3. What the panel offers depends on what the connector already holds:
+
+| The connector has | The panel shows |
+|---|---|
+| No asset yet | The registration form (below). |
+| One or more assets of the testbed type, none chosen (for example registered earlier with a script) | **Choose your testbed asset**: pick one with **Use this asset**. It is marked as the testbed asset, and its `no-constraint-policy` and contract definition are created if they are missing. Registering a second asset is refused. |
+| A chosen testbed asset | The asset, with **Remove**. Remove it to register or choose a different one. |
+
+The registration form takes:
 
 | Field | Value |
 |---|---|
@@ -190,9 +198,11 @@ The connector's management API is not published, so the operator registers the b
 | Access key and secret key | An access key of the testbed's own S3 store (created in its console). This is not the Data Lake key. |
 | Prefix | Optional. Leave it empty to watch the whole bucket. |
 
-4. Register. In one step this creates the asset, the `no-constraint-policy` and a contract definition that offers every asset under it.
+**Register** creates, in one step, the asset, the `no-constraint-policy` and a contract definition that offers every asset under it.
 
-The asset's data-address type is `6GDaliTestbedExperiments`. The page lists the assets of that type and says how many assets of other types it hides. An asset of another or an older type (for example `MinioFiles`) cannot be transferred by the connector's data plane: remove it and register it again.
+The asset's data-address type is `6GDaliTestbedExperiments`. The panel works with assets of that type and says how many assets of other types it hides; **show them** lists them. An asset of another or an older type (for example `MinioFiles`) cannot be transferred by the connector's data plane: remove it and register the asset again.
+
+In the catalogue's asset table the testbed asset carries a *testbed asset* badge and has no Validation, Preview or Download buttons, because those actions apply to files in the data lake.
 
 Until the asset exists, the testbed offers nothing to the data space. Tell the platform administrator when it is registered.
 
@@ -213,7 +223,7 @@ A testbed connector must be reachable by the 6G-DALI Data Space connector over D
 | Path | Backend port | Expose publicly? |
 |---|---|---|
 | `/protocol*` | 18192 (DSP) | **Yes.** This is what the 6G-DALI Data Space connector calls. |
-| `/api*` | 18190 (observability, catalogue and asset pages) | Needed for the asset page (§4.3), which is protected by its admin key. Otherwise optional. |
+| `/api*` | 18190 (observability, catalogue page) | Needed for the catalogue page and its Testbed asset panel (§4.3); changes there are protected by the admin key. Otherwise optional. |
 
 **Connector configuration**
 
@@ -303,9 +313,9 @@ Notes:
 ## 9. Onboarding checklist for a testbed operator
 
 - [ ] Deploy the stack from the bundle: `docker compose up -d` and check `/api/check/health` (§4).
-- [ ] Make the connector reachable (§5): create the DNS record, install the nginx vhost with TLS, expose `/protocol` (and `/api` for the asset page), and make sure `edc.dsp.callback.address` is the `https://` URL.
+- [ ] Make the connector reachable (§5): create the DNS record, install the nginx vhost with TLS, expose `/protocol` (and `/api` for the catalogue page), and make sure `edc.dsp.callback.address` is the `https://` URL.
 - [ ] Create an access key in the testbed's own S3 store for the connector.
-- [ ] Register the bucket as an asset on the connector's asset page (§4.3) and tell the administrator.
+- [ ] Register the bucket as an asset in the Testbed asset panel of the connector's catalogue page (§4.3) and tell the administrator.
 - [ ] Set `edc.rabbitmq.*` only if the testbed wants completion messages from its own broker.
 - [ ] Upload a small test dataset (`metadata.json`, then a CSV) and check that:
   - the dataset appears in the 6G-DALI catalogue,
