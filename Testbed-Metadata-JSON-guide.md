@@ -48,8 +48,8 @@ The `metadata.json` file must be sent **before or alongside** the CSV data files
 
 | Field | Obligation | Type | Default | Description |
 |-------|-----------|------|---------|-------------|
-| `license` | **M** | string (URI) | `https://creativecommons.org/licenses/by/4.0/` | License URI. Use a standard license URI (see examples below) |
-| `access_rights` | **M** | string | `PUBLIC` | Access condition code from the EU Access Right vocabulary. Values: `PUBLIC`, `RESTRICTED`, `NON_PUBLIC` |
+| `license` | **M** | string (URI) | `https://creativecommons.org/licenses/by/4.0/` | License URI. Use a standard license URI (see examples below); a known code such as `CC-BY-4.0` or `MIT` is also accepted and turned into its URI |
+| `access_rights` | **M** | string | `PUBLIC` | Access condition code from the EU Access Right vocabulary. Values: `PUBLIC`, `RESTRICTED`, `NON_PUBLIC`. It does not decide who sees the dataset: every new dataset is Members only until an administrator publishes it (Testbed Integration Guide §9) |
 | `gdpr_compliant` | **M** | boolean | `true` | Owner's statement that the dataset complies with GDPR (SNS-JU CMT requirement) |
 | `fair_compliant` | **M** | boolean | `true` | Owner's statement that the dataset follows the FAIR principles |
 | `contains_pii` | **M** | boolean | `false` | Whether the data contains personally identifiable information (GAIA-X `containsPII`) |
