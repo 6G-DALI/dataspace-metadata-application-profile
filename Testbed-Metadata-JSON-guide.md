@@ -1,6 +1,6 @@
 # 6G-DALI Dataset Metadata File Guide
 
-**Version:** 1.1  
+**Version:** 1.2  
 **For:** Testbed owners preparing dataset metadata for the 6G-DALI Data Space  
 **Platform:** piveau-hub (DCAT-AP 3.0 compliant)
 
@@ -49,7 +49,7 @@ The `metadata.json` file must be sent **before or alongside** the CSV data files
 | Field | Obligation | Type | Default | Description |
 |-------|-----------|------|---------|-------------|
 | `license` | **M** | string (URI) | `https://creativecommons.org/licenses/by/4.0/` | License URI. Use a standard license URI (see examples below); a known code such as `CC-BY-4.0` or `MIT` is also accepted and turned into its URI |
-| `access_rights` | **M** | string | `PUBLIC` | Access condition code from the EU Access Right vocabulary. Values: `PUBLIC`, `RESTRICTED`, `NON_PUBLIC`. It does not decide who sees the dataset: every new dataset is Members only until an administrator publishes it (Testbed Integration Guide §9) |
+| `access_rights` | **M** | string | `NON_PUBLIC` | Who sees the dataset, from the EU Access Right vocabulary: `PUBLIC` everyone, `RESTRICTED` signed-in users, `NON_PUBLIC` the catalogue's members only. Applied when the dataset is first registered; without it, or with another value, the dataset is members only. Changing it later in the file has no effect: an administrator changes the visibility (Testbed Integration Guide §9) |
 | `gdpr_compliant` | **M** | boolean | `true` | Owner's statement that the dataset complies with GDPR (SNS-JU CMT requirement) |
 | `fair_compliant` | **M** | boolean | `true` | Owner's statement that the dataset follows the FAIR principles |
 | `contains_pii` | **M** | boolean | `false` | Whether the data contains personally identifiable information (GAIA-X `containsPII`) |

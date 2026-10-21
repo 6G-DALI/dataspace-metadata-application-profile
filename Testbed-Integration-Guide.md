@@ -14,7 +14,7 @@ A testbed joins the 6G-DALI Data Space in one of two ways, chosen when it is reg
 - **With its own connector.** The testbed runs a **testbed EDC connector** next to its own data storage and keeps its data. The 6G-DALI Data Space connector pulls the data under a negotiated contract.
 - **Hosted by the facility connector.** The testbed runs nothing. It gets an **upload bucket** in the 6G-DALI Data Lake and a key for it, and uploads its datasets there. The 6G-DALI facility connector offers that bucket and moves each uploaded file into the Data Space.
 
-Either way, every dataset ends up in the testbed's own **catalogue** in the 6G-DALI catalogue, as **Members only** until an administrator publishes it (§9).
+Either way, every dataset ends up in the testbed's own **catalogue** in the 6G-DALI catalogue, with the visibility its `metadata.json` asks for in `access_rights` (**Members only** when it asks for none). Administrators can change it afterwards (§9).
 
 Two roles take part:
 
@@ -118,12 +118,12 @@ The transfer is started during provisioning on purpose: it only picks up files t
 2. The connector's data plane (the testbed's, or the facility connector's for a hosted testbed) sees the new objects on its next poll.
 3. It transfers each file to the central Data Lake, into the testbed's bucket. The testbed's directory and file names are not kept: the dataset directory becomes a random UUID (the mapping is stored in the bucket under `.datasets/`), `metadata.json` keeps its name, and each CSV is stored as `<dataset-uuid>/<file-uuid>.csv`. A file's UUID is remembered (under `.files/`), so sending the same file again overwrites the same object. The original file name is kept as the object's `original-name` metadata.
 4. The central registration service sees the new objects on its next poll:
-   - For `metadata.json`, it registers a DCAT-AP dataset in the testbed's catalogue (§8). The bucket is the catalogue id, the directory (the dataset's UUID) the dataset id. A new dataset is **Members only** (§9).
+   - For `metadata.json`, it registers a DCAT-AP dataset in the testbed's catalogue (§8). The bucket is the catalogue id, the directory (the dataset's UUID) the dataset id. A new dataset gets the visibility its `access_rights` asks for, **Members only** without one (§9).
    - For each CSV, it registers an EDC asset and adds a distribution to the dataset. Per-file fields such as `columns` and `measurement_technique` come from `metadata.json`.
    - It handles `metadata.json` before the CSVs of the same poll. A CSV whose dataset is not registered yet is retried on later polls, so the upload order is not critical.
 5. With its own connector, the testbed's connector also publishes a completion message to the testbed's RabbitMQ broker (§10).
 6. Once registered, the dataset is eligible for central validation and DataOps: the `dali_dataspace_validate_dataset` Airflow DAG runs format checks, Great Expectations and the DataOps pipeline, and writes the quality report back into the catalogue as `dqv:QualityMeasurement` entries. Each distribution is retrieved over EDC by its `dali:assetId`.
-7. An administrator **publishes** the dataset when it is ready to be seen beyond the catalogue's members (§9).
+7. An administrator can **change the dataset's visibility** later, on the DataOps edit page (§9).
 
 **Files the registration missed.** The registration service only handles files that appear while it runs; files already in a bucket when it starts are marked as seen and skipped. Its status page (central, for administrators) lists every dataset and file per catalogue, whether each is in the catalogue, and re-registers the missing ones on request. Re-registering never adds a file twice and never changes a dataset's visibility.
 
@@ -329,7 +329,7 @@ Rules to remember:
 - `theme` and `language` take EU authority **codes** (`TECH`, `ENG`), not URLs.
 - `license` is a licence URL or a known code: `CC-BY-4.0`, `CC-BY-SA-4.0`, `CC0-1.0`, `MIT`, `Apache-2.0` and other SPDX ids are turned into their URL.
 - `produced_by` is preferably your organisation's GAIA-X participant IRI (ask the platform administrator). A plain organisation name is accepted and recorded as the organisation's name.
-- `access_rights` is still accepted, but it **does not decide who sees the dataset**: a new dataset is always Members only until an administrator publishes it (§9).
+- `access_rights` **decides who sees the dataset when it is first registered**: `PUBLIC` everyone, `RESTRICTED` signed-in users, `NON_PUBLIC` the catalogue's members only. Without it, or with a value not in that list, the dataset is Members only. Changing it in the file later has no effect: ask an administrator (§9).
 - Unknown keys are ignored. Both `snake_case` and `camelCase` are accepted.
 - `testbed_context` is optional. Omit unknown fields rather than leaving `TODO` values.
 - The file must be named `metadata.json` (case-insensitive) and sit in the dataset's directory. Other `.json` files are not treated as dataset metadata.
@@ -342,15 +342,15 @@ Rules to remember:
 
 **Datasets** have one of three visibilities:
 
-| Visibility | Who sees the dataset |
-|---|---|
-| **Public** | Everyone, signed in or not. |
-| **Signed-in users** | Anyone signed in to 6G-DALI. |
-| **Members only** | The catalogue's members and the Data Space operators. Everyone else neither finds nor opens it. |
+| Visibility | Who sees the dataset | `access_rights` in `metadata.json` |
+|---|---|---|
+| **Public** | Everyone, signed in or not. | `PUBLIC` |
+| **Signed-in users** | Anyone signed in to 6G-DALI. | `RESTRICTED` |
+| **Members only** | The catalogue's members and the Data Space operators. Everyone else neither finds nor opens it. | `NON_PUBLIC`, missing, or any other value |
 
-- **Every new dataset is Members only**, in every catalogue, whatever its `metadata.json` says.
-- **Publishing** is done by the testbed's administrators (or the platform administrators) on the testbed page's **Datasets** tab: *Edit* opens the dataset's page, where its visibility can be set to any of the three, in public and private catalogues alike. The same page edits its title, description, keywords and licence.
-- A dataset keeps its visibility when it is registered again (a re-uploaded `metadata.json`, a re-registration by an administrator). Re-registering does bring back the `metadata.json` fields, undoing edits made in DataOps.
+- **A new dataset gets the visibility its `metadata.json` asks for** in `access_rights`, as in the table. This holds in public and private catalogues alike: a `PUBLIC` dataset in a private catalogue is public, while the catalogue keeps its *Members only* badge. The bundle's `template/metadata.json` and the metadata builder start with `PUBLIC`; set `NON_PUBLIC` for a dataset that must stay within the catalogue's members, test datasets included.
+- **Changing the visibility later** is done by the testbed's administrators (or the platform administrators) on the testbed page's **Datasets** tab: *Edit* opens the dataset's page, where its visibility can be set to any of the three, in public and private catalogues alike. The same page edits its title, description, keywords and licence.
+- A dataset keeps its visibility when it is registered again (a re-uploaded `metadata.json`, a re-registration by an administrator), even if `access_rights` has changed in the file. Re-registering does bring back the `metadata.json` fields, undoing edits made in DataOps.
 
 **Members.** The testbed page's **Access** tab manages the catalogue's members, by e-mail address, at three levels:
 
@@ -402,7 +402,7 @@ Notes:
 - [ ] Register the bucket as an asset in the Testbed asset panel of the connector's catalogue page (§4.3) and tell the administrator.
 - [ ] Set `edc.rabbitmq.*` only if the testbed wants completion messages from its own broker.
 - [ ] Upload a small test dataset (`metadata.json`, then a CSV) and check, with the administrator, that:
-  - the dataset appears on the testbed page's Datasets tab (Members only),
+  - the dataset appears on the testbed page's Datasets tab, with the visibility its `access_rights` asks for,
   - the file lands in the central Data Lake,
   - a `SUCCESS` message arrives on the testbed's own queue (if RabbitMQ is configured).
 
@@ -410,7 +410,7 @@ Notes:
 
 - [ ] Store the upload kit's secret key safely; it is shown once (§6).
 - [ ] Upload a small test dataset (`metadata.json`, then a CSV) with the kit (§6, §7).
-- [ ] Check, with the administrator, that the dataset appears on the testbed page's Datasets tab (Members only).
+- [ ] Check, with the administrator, that the dataset appears on the testbed page's Datasets tab, with the visibility its `access_rights` asks for.
 
 ### 11.3 Platform administrator, for any testbed
 
@@ -418,4 +418,4 @@ Notes:
 - [ ] Add the testbed's administrators (Access tab) and the catalogue's members (Access tab → Catalogue access).
 - [ ] Add the testbed's Data Lake bucket to the asset monitor's watched buckets (`MONITOR_BUCKETS`), as provisioning reminds.
 - [ ] With its own connector: Find asset, Negotiate contract, Start transfer (Assets tab). Hosted: check the Assets tab shows the transfer active.
-- [ ] After the test upload, publish the test dataset or leave it Members only (§9).
+- [ ] After the test upload, check the test dataset's visibility and change it if needed (§9).
