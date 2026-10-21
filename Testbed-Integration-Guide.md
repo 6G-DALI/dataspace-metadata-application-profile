@@ -248,7 +248,13 @@ edc.dsp.callback.address=https://edc.<testbed>.6gdali.eu/protocol
 
 Use `https://` throughout.
 
-**Testbeds on a private network.** A testbed that is only reachable over a private network (a tailnet, for example) registers the address the Data Space connector can reach, such as `http://<host>:18192/protocol`. What matters is that the DSP URL registered in the DataOps UI is exactly the address the Data Space connector uses to reach the testbed's connector. A testbed that cannot be made reachable at all can be **hosted** instead (§6).
+**Testbeds without a domain name.** A testbed with only a public IP address leaves out the nginx vhost and gives the administrator its IP address. Open 18192 (DSP) and 18190 (catalogue page) on the host, never 18191 or 18193, and set:
+
+```properties
+edc.dsp.callback.address=http://<testbed-ip>:18192/protocol
+```
+
+Either way, the DSP URL registered in the DataOps UI must be exactly the address the Data Space connector uses to reach the testbed's connector. A testbed that cannot be made reachable at all can be **hosted** instead (§6).
 
 ---
 
