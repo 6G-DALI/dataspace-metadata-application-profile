@@ -1,6 +1,6 @@
 # 6G-DALI Dataset Metadata File Guide
 
-**Version:** 1.2  
+**Version:** 1.3  
 **For:** Testbed owners preparing dataset metadata for the 6G-DALI Data Space  
 **Platform:** piveau-hub (DCAT-AP 3.0 compliant)
 
@@ -106,11 +106,10 @@ The `metadata.json` file must be sent **before or alongside** the CSV data files
 
 | Field | Obligation | Type | Description |
 |-------|-----------|------|-------------|
-| `columns` | R | array of strings | List of column/variable names in the dataset |
-| `measurement_technique` | R | string | Description of how measurements were collected (e.g. `"Prometheus-based 5G NR KPI monitoring with 1s scrape interval"`) |
-| `record_count` | O | integer | Approximate number of rows/records |
-| `file_format` | O | string | File format (e.g. `"CSV"`, `"JSON"`) |
-| `number_of_files` | O | integer | Number of data files in this dataset |
+| `measurement_technique` | R | string | Description of how measurements were collected (e.g. `"Prometheus-based 5G NR KPI monitoring with 1s scrape interval"`). Written on each data file's catalogue entry |
+| `columns` | O | array of strings | Only for data files without a header line (not CSV or TSV). A CSV's or TSV's columns are read from its own header line; a list here that differs from the header is ignored |
+
+> **Described from the files themselves.** For each data file the platform records its columns (from the header line), its format (from the extension), its size and its checksum. You do not list them here. `record_count`, `file_format` and `number_of_files` are still accepted but no longer used.
 
 ---
 
@@ -188,26 +187,14 @@ The `testbed_context` object captures your testbed infrastructure and experiment
   "contact_email": "5glab@eurecom.fr",
   "contributors": ["Jane Doe", "John Roe"],
   "related_publications": ["https://doi.org/10.1000/example"],
-  "produced_by": "https://dali-project.eu/participant/eurecom",
+  "produced_by": "https://dataspace.6gdali.eu/participant/eurecom",
 
   "sns_project_name": "6G-DALI",
 
   "theme": "TECH",
   "keywords": ["5G", "RAN", "KPI", "gNB", "QoS"],
 
-  "columns": [
-    "source",
-    "metric_id",
-    "timestamp",
-    "unit",
-    "value",
-    "IP_address",
-    "gNB_id"
-  ],
   "measurement_technique": "Prometheus-based 5G NR KPI monitoring with 1s scrape interval",
-  "record_count": 3239,
-  "file_format": "CSV",
-  "number_of_files": 1,
 
   "testbed_context": {
     "environment": "urban",

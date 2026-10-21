@@ -116,10 +116,10 @@ The transfer is started during provisioning on purpose: it only picks up files t
 
 1. The operator uploads `metadata.json` **first**, then the data files, under one directory in the bucket (§7).
 2. The connector's data plane (the testbed's, or the facility connector's for a hosted testbed) sees the new objects on its next poll.
-3. It transfers each file to the central Data Lake, into the testbed's bucket. The testbed's directory and file names are not kept: the dataset directory becomes a random UUID (the mapping is stored in the bucket under `.datasets/`), `metadata.json` keeps its name, and each CSV is stored as `<dataset-uuid>/<file-uuid>.csv`. A file's UUID is remembered (under `.files/`), so sending the same file again overwrites the same object. The original file name is kept as the object's `original-name` metadata.
+3. It transfers each file to the central Data Lake, into the testbed's bucket. The testbed's directory and file names are not kept: the dataset directory becomes a random UUID (the mapping is stored in the bucket under `.datasets/`), `metadata.json` keeps its name, and each CSV is stored as `<dataset-uuid>/<file-uuid>.csv`. A file's UUID is remembered (under `.files/<dataset-dir>/<file name>`), so sending the same file again overwrites the same object. The catalogue lists each file under its UUID name.
 4. The central registration service sees the new objects on its next poll:
    - For `metadata.json`, it registers a DCAT-AP dataset in the testbed's catalogue (§8). The bucket is the catalogue id, the directory (the dataset's UUID) the dataset id. A new dataset gets the visibility its `access_rights` asks for, **Members only** without one (§9).
-   - For each CSV, it registers an EDC asset and adds a distribution to the dataset. Per-file fields such as `columns` and `measurement_technique` come from `metadata.json`.
+   - For each CSV, it registers an EDC asset and adds a distribution to the dataset, described from the file itself: its columns from its header line, its format, size and checksum. `measurement_technique` and `license` come from `metadata.json`.
    - It handles `metadata.json` before the CSVs of the same poll. A CSV whose dataset is not registered yet is retried on later polls, so the upload order is not critical.
 5. With its own connector, the testbed's connector also publishes a completion message to the testbed's RabbitMQ broker (§10).
 6. Once registered, the dataset is eligible for central validation and DataOps: the `dali_dataspace_validate_dataset` Airflow DAG runs format checks, Great Expectations and the DataOps pipeline, and writes the quality report back into the catalogue as `dqv:QualityMeasurement` entries. Each distribution is retrieved over EDC by its `dali:assetId`.
@@ -305,7 +305,7 @@ Any S3 client works (`mc`, `rclone`, boto3); use path-style addressing if the cl
 The data files must satisfy the [Input Dataset Format](6G-DALI-input-dataset-format.md). The main rules are:
 
 - UTF-8 with no BOM, comma-delimited, `.` as the decimal separator.
-- Header names in ASCII lowercase `snake_case`, matching `columns` in `metadata.json` exactly.
+- A header line, with names in ASCII lowercase `snake_case`: they become the file's column list in the catalogue, and DataOps builds its quality checks from them.
 - One row per timestamp for time series. Pivot or split long-format data first.
 - No archives and no compression.
 
