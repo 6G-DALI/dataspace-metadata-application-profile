@@ -1,6 +1,6 @@
 # 6G-DALI Testbed Integration Guide
 
-**Version:** 0.3 (draft)
+**Version:** 0.4 (draft)
 **Project:** 6G-DALI (SNS-JU)
 **Audience:** Testbed operators joining the 6G-DALI Data Space, and the platform administrators who onboard them
 **Companion documents:** [Metadata Application Profile](6G-DALI-Metadata-Application-Profile.md) · [Testbed Metadata JSON Guide](Testbed-Metadata-JSON-guide.md) · [Input Dataset Format](6G-DALI-input-dataset-format.md)
@@ -18,13 +18,14 @@ Either way, every dataset ends up in the testbed's own **catalogue** in the 6G-D
 
 Two roles take part:
 
-- The **testbed operator** runs the connector (or uses the upload kit) and uploads datasets.
-- The **platform administrator** registers the testbed in the DataOps UI, which prepares its place in the platform, and connects it to the data space.
+- The **testbed operator** asks for the testbed to be registered (§3.1), runs the connector (or uses the upload kit) and uploads datasets.
+- The **platform administrator** approves the operator's request, or registers the testbed directly, in the DataOps UI. That prepares the testbed's place in the platform; the administrator then connects it to the data space.
 
 The testbed operator's responsibilities:
 
 | With its own connector | Hosted by the facility connector |
 |---|---|
+| Request the testbed in the DataOps UI and wait for approval (§3.1). | Request the testbed in the DataOps UI and wait for approval (§3.1). |
 | Deploy the connector stack from the bundle the administrator provides (§4). | Receive the upload kit from the administrator (§6). |
 | Make the connector reachable by the 6G-DALI Data Space connector, through a TLS reverse proxy (§5). | — |
 | Register the dataset bucket as an asset on the connector's catalogue page (§4.3). | — |
@@ -69,7 +70,7 @@ A **hosted** testbed has no site-side part. It uploads straight into its upload 
 | **6G-DALI Data Space (facility) connector** | The central EDC connector. It acts as consumer for every testbed, and as provider for hosted testbeds. |
 | **DataOps UI and orchestrator** | The administrators' control plane. The orchestrator keeps the testbed registry, provisions each testbed (Data Lake bucket and key, catalogue, Keycloak group, and for hosted testbeds the upload bucket, upload key, asset and transfer), generates the connector bundle, and drives the Data Space connector. The testbed's page also manages its datasets and who can access them. |
 | **Data Lake** | Central S3-compatible store (MinIO). Each testbed gets its own bucket, named after `edc.experiment.prefix`, and an access key that can only list, read and write that bucket. A hosted testbed also gets `<bucket>-upload`. |
-| **Central registration (asset monitor)** | Watches the testbeds' Data Lake buckets. For each new `metadata.json` it registers a dataset in the catalogue, and for each new data file it registers an EDC asset and adds a distribution to the dataset. Its status page lets an administrator re-register files it skipped (§3.3). |
+| **Central registration (asset monitor)** | Watches the Data Lake buckets of the provisioned testbeds, taking the list from the testbed registry. For each new `metadata.json` it registers a dataset in the catalogue, and for each new data file it registers an EDC asset and adds a distribution to the dataset. Its status page lets an administrator re-register files it skipped (§3.4). |
 | **6G-DALI catalogue** | DCAT-AP 3.0 catalogue (piveau, with access control). Each testbed has its own catalogue, named after its bucket, public or private (§9). The public front end is `https://catalogue.dataspace.6gdali.eu`. |
 | **RabbitMQ (testbed-side)** | A broker run by the testbed. Its connector publishes one message per CSV file transferred. It is not connected to the central platform. Testbeds with their own connector only. |
 
@@ -77,11 +78,31 @@ A **hosted** testbed has no site-side part. It uploads straight into its upload 
 
 ## 3. End-to-end flow
 
-### 3.1 Onboarding a testbed with its own connector
+### 3.1 Requesting a testbed
 
-The **platform administrator**, in the DataOps UI (Testbeds → Register testbed):
+Anyone who signs in to the DataOps UI can ask for a testbed to be registered; a platform administrator decides. In the UI: Testbeds → **Request testbed registration**, which asks for:
 
-1. **Registers the testbed**, choosing *Its own connector* and whether its catalogue is **public or private** (§9; fixed once the catalogue exists). The registry assigns its identity: participant ID, experiment prefix, bucket and DSP URL.
+| Field | What to give |
+|---|---|
+| **Short id (slug)** | 3-32 characters: lowercase letters and digits only, starting with a letter. It names the testbed's bucket and catalogue and cannot be changed later. |
+| **Name**, **organization**, **operator contact** | How the testbed is shown. The contact defaults to the requester's e-mail address. |
+| **What the testbed is and will share** | A note for the administrators who review the request. |
+| **Connector** | *Its own connector*, optionally with the DSP URL it will be reached on, or *Hosted by the facility connector* (§6). Fixed once the testbed is registered. |
+| **Catalogue** | *Public* or *private* (§9). Fixed once the catalogue exists. |
+| **Logo URL** | Optional: an `https` image shown on the testbed's catalogue. |
+
+A request reserves the short id and creates nothing else. It appears in the requester's Testbeds list as *awaiting approval*; the requester can withdraw it, and can have three waiting at a time. An administrator opens it from the same list and either:
+
+- **approves** it. The requester becomes the testbed's owner (a member of its Keycloak group, so they can manage it) and the testbed is provisioned, as in §3.2 or §3.3; or
+- **rejects** it, with a reason the requester can read. The requester can then withdraw the request, which frees the short id, and send a new one.
+
+After approval the testbed is an ordinary registered testbed: its owner finds it in the Testbeds list and continues from §3.2 or §3.3. An administrator can still register a testbed directly (Testbeds → Register testbed), without a request.
+
+### 3.2 Onboarding a testbed with its own connector
+
+The **platform administrator**, in the DataOps UI (approving the request, §3.1, or Testbeds → Register testbed):
+
+1. **Registers the testbed**, choosing *Its own connector* and whether its catalogue is **public or private** (§9; fixed once the catalogue exists). The registry assigns its identity: participant ID, experiment prefix, bucket and DSP URL. When the operator requested the testbed (§3.1), approving the request does steps 1 and 2 at once.
 2. **Provisions it.** This creates the testbed's Data Lake bucket, a bucket-scoped Data Lake key, its catalogue and its Keycloak group.
 3. **Downloads the connector bundle** (testbed page → Overview) and gives it to the operator (§4.1).
 
@@ -100,19 +121,19 @@ The transfer is long-lived. It stays `STARTED` and keeps polling the bucket, so 
 
 The Data Lake key never reaches the testbed. The Data Space connector supplies it in the transfer request, and the testbed's data plane uses it only to write into the testbed's own bucket. The connector properties therefore contain no Data Lake credentials.
 
-### 3.2 Onboarding a hosted testbed
+### 3.3 Onboarding a hosted testbed
 
 The **platform administrator**, in the DataOps UI:
 
 1. **Registers the testbed**, choosing *Hosted by the facility connector* and public or private (§9).
 2. **Provisions it.** Besides the bucket, key, catalogue and group, this creates the **upload bucket** `<bucket>-upload` and an **upload key** limited to it. It also registers the upload bucket as an asset on the facility connector, and **starts the transfer**: the facility connector negotiates with itself and transfers into the testbed's Data Lake bucket.
-3. **Hands over the upload kit** shown at the end of the wizard (§6): endpoint, bucket, access key and **secret key**. The secret is shown only this once and is not stored. If it is lost, *New upload key* on the testbed's Overview replaces the key.
+3. **Hands over the upload kit** shown at the end of the wizard (§6): endpoint, bucket, access key and **secret key**. The secret is shown only this once and is not stored. If it is lost, *New upload key* on the testbed's Overview replaces the key. Approving a request shows no secret to anyone, so its owner creates the key with *New upload key* there.
 
 The **testbed operator** then uploads datasets (§7). There is nothing to deploy.
 
 The transfer is started during provisioning on purpose: it only picks up files that arrive while it runs, so it must be running before the first upload. If the facility connector restarts, files uploaded while it is down are not transferred. The **Assets** tab shows whether the transfer is active (*Find transfer*) and restarts it (*Start transfer*).
 
-### 3.3 Per-dataset flow (steady state)
+### 3.4 Per-dataset flow (steady state)
 
 1. The operator uploads `metadata.json` **first**, then the data files, under one directory in the bucket (§7).
 2. The connector's data plane (the testbed's, or the facility connector's for a hosted testbed) sees the new objects on its next poll.
@@ -126,6 +147,12 @@ The transfer is started during provisioning on purpose: it only picks up files t
 7. An administrator can **change the dataset's visibility** later, on the DataOps edit page (§9).
 
 **Files the registration missed.** The registration service only handles files that appear while it runs; files already in a bucket when it starts are marked as seen and skipped. Its status page (central, for administrators) lists every dataset and file per catalogue, whether each is in the catalogue, and re-registers the missing ones on request. Re-registering never adds a file twice and never changes a dataset's visibility.
+
+**Which buckets are watched.** The asset monitor takes the buckets of the provisioned testbeds from the testbed registry, so a testbed needs no configuration there. It asks again every minute, so a new testbed's bucket is watched within a minute of provisioning; the files already in it at that moment are marked as seen and skipped, like those present when the monitor starts, and an administrator can re-register them from the status page. The monitor keeps the last list it received, so a restart while DataOps is down still watches the same buckets.
+
+### 3.5 Following a testbed's progress
+
+The Testbeds list shows each testbed's progress as nine icons, and the testbed page shows the same stages as a timeline: **registered**, **bucket**, **key** (the bucket-scoped Data Lake key), **catalogue**, **provisioned**, **connector** (reachable; the facility connector for a hosted testbed), **asset** (the testbed offers its bucket), **contract** (agreed) and **transfer** (running). A green icon is reached, a red one failed and an outlined one is the next level; hovering an icon shows the detail. A request that is not approved yet shows *awaiting approval*, or *rejected*, instead.
 
 ---
 
@@ -281,7 +308,7 @@ Any S3 client works (`mc`, `rclone`, boto3); use path-style addressing if the cl
 
 - Lay out each dataset as in §7, `metadata.json` first.
 - If the secret is lost, the testbed's administrators create a **new upload key** on the testbed page (Overview → *New upload key*). The old key stops working at once; the running transfer is not affected.
-- Only files uploaded while the facility connector's transfer is running are picked up (§3.2). If an upload does not appear in the catalogue, ask the administrator to check the transfer.
+- Only files uploaded while the facility connector's transfer is running are picked up (§3.3). If an upload does not appear in the catalogue, ask the administrator to check the transfer.
 - There are no transfer-completion messages for hosted testbeds (§10): check the catalogue instead.
 
 ---
@@ -396,6 +423,7 @@ Notes:
 
 ### 11.1 Testbed with its own connector
 
+- [ ] Request the testbed in the DataOps UI (§3.1) and wait for the administrator's approval; you then own it.
 - [ ] Deploy the stack from the bundle: `docker compose up -d` and check `/api/check/health` (§4).
 - [ ] Make the connector reachable (§5): create the DNS record, install the nginx vhost with TLS, expose `/protocol` (and `/api` for the catalogue page), and make sure `edc.dsp.callback.address` is the `https://` URL.
 - [ ] Create an access key in the testbed's own S3 store for the connector.
@@ -408,13 +436,15 @@ Notes:
 
 ### 11.2 Hosted testbed
 
-- [ ] Store the upload kit's secret key safely; it is shown once (§6).
+- [ ] Request the testbed in the DataOps UI, choosing *Hosted by the facility connector* (§3.1), and wait for the administrator's approval; you then own it.
+- [ ] Store the upload kit's secret key safely; it is shown once (§6). For a testbed created from a request, create the key first with *New upload key* on the testbed's Overview.
 - [ ] Upload a small test dataset (`metadata.json`, then a CSV) with the kit (§6, §7).
 - [ ] Check, with the administrator, that the dataset appears on the testbed page's Datasets tab, with the visibility its `access_rights` asks for.
 
 ### 11.3 Platform administrator, for any testbed
 
-- [ ] Register the testbed with the right connector choice and catalogue visibility, and provision it; every step must be green (§3.1, §3.2).
+- [ ] Review each testbed request (Testbeds list): approve it, which makes the requester the owner and provisions the testbed, or reject it with a reason (§3.1).
+- [ ] Or register a testbed directly, without a request, with the right connector choice and catalogue visibility, and provision it; every step must be green (§3.2, §3.3).
 - [ ] Add the testbed's administrators (Access tab) and the catalogue's members (Access tab → Catalogue access).
 - [ ] The asset monitor watches the testbed's Data Lake bucket: automatically once the monitor follows the registry (`MONITOR_BUCKETS_TOKEN`), otherwise add it to `MONITOR_BUCKETS`, as provisioning reminds.
 - [ ] With its own connector: Find asset, Negotiate contract, Start transfer (Assets tab). Hosted: check the Assets tab shows the transfer active.
