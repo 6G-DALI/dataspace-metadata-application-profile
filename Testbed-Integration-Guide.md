@@ -416,6 +416,6 @@ Notes:
 
 - [ ] Register the testbed with the right connector choice and catalogue visibility, and provision it; every step must be green (§3.1, §3.2).
 - [ ] Add the testbed's administrators (Access tab) and the catalogue's members (Access tab → Catalogue access).
-- [ ] Add the testbed's Data Lake bucket to the asset monitor's watched buckets (`MONITOR_BUCKETS`), as provisioning reminds.
+- [ ] The asset monitor watches the testbed's Data Lake bucket: automatically once the monitor follows the registry (`MONITOR_BUCKETS_TOKEN`), otherwise add it to `MONITOR_BUCKETS`, as provisioning reminds.
 - [ ] With its own connector: Find asset, Negotiate contract, Start transfer (Assets tab). Hosted: check the Assets tab shows the transfer active.
 - [ ] After the test upload, check the test dataset's visibility and change it if needed (§9).
