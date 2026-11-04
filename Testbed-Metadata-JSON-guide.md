@@ -44,6 +44,20 @@ The `metadata.json` file must be sent **before or alongside** the CSV data files
 
 ---
 
+### Experiment
+
+When 6G-DALI asks your testbed to run an experiment, the request carries an **experiment identifier**. Copy it into the `metadata.json` of every dataset that experiment produces, together with the time the experiment ran. The catalogue then shows each dataset as created by that experiment, and datasets from the same experiment are linked.
+
+| Field | Obligation | Type | Description |
+|-------|-----------|------|-------------|
+| `experiment_id` | **M** for a dataset produced by a requested experiment, otherwise O | string (UUID) | The identifier from the experiment request, copied unchanged. Several datasets of one experiment carry the same value |
+| `experiment_started_at` | R | string | When the experiment started. UTC date-time, `YYYY-MM-DDThh:mm:ssZ` |
+| `experiment_ended_at` | R | string | When the experiment ended. Same format; not before `experiment_started_at` |
+
+> The two times are published only together with an `experiment_id`. A dataset that was not produced by a requested experiment leaves all three out.
+
+---
+
 ### Rights and License
 
 | Field | Obligation | Type | Default | Description |
@@ -173,6 +187,10 @@ The `testbed_context` object captures your testbed infrastructure and experiment
   "spatial": "Sophia Antipolis, France",
   "temporal_start": "2025-10-01",
   "temporal_end": "2025-10-31",
+
+  "experiment_id": "6f1c2a52-9b1e-4f6e-8a55-2f0b7d1c9e10",
+  "experiment_started_at": "2025-10-01T08:00:00Z",
+  "experiment_ended_at": "2025-10-31T20:00:00Z",
 
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "access_rights": "PUBLIC",

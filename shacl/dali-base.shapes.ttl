@@ -284,6 +284,50 @@ dali:DatasetShape
 
 
 # ---------------------------------------------------------------------------
+# dali:ExperimentShape
+# Node shape for dali:Experiment resources: the experiment run that produced a
+# dataset (linked with prov:wasGeneratedBy, MAP §5.4.1).
+# ---------------------------------------------------------------------------
+
+dali:ExperimentShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI Experiment" ;
+    sh:targetClass  dali:Experiment ;
+
+    sh:property [
+        sh:path     dct:identifier ;
+        sh:name     "Experiment identifier" ;
+        sh:description "The experiment identifier issued with the request." ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Violation ;
+        sh:message  "dali:Experiment must have exactly one dct:identifier."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     prov:startedAtTime ;
+        sh:name     "Started at" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:lessThanOrEquals prov:endedAtTime ;
+        sh:severity sh:Warning ;
+        sh:message  "prov:startedAtTime is recommended (xsd:dateTime) and must not be after prov:endedAtTime."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     prov:endedAtTime ;
+        sh:name     "Ended at" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:severity sh:Warning ;
+        sh:message  "prov:endedAtTime is recommended (xsd:dateTime)."@en ;
+    ] .
+
+
+# ---------------------------------------------------------------------------
 # dali:DistributionShape
 # Node shape for dcat:Distribution resources.
 # ---------------------------------------------------------------------------

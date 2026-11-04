@@ -69,6 +69,21 @@ dali:TestbedContext
     rdfs:seeAlso        <https://bscw.sns-ju.eu/sec/bscw.cgi/606978> .
 
 
+# -----------------------------------------------------------------------------
+# dali:Experiment
+# An experiment run requested from a testbed. A dataset it produced points to it
+# with prov:wasGeneratedBy; its dct:identifier is the experiment identifier
+# issued with the request. IRI: https://dali-project.eu/experiment/{identifier}
+# -----------------------------------------------------------------------------
+
+dali:Experiment
+    rdf:type            owl:Class ;
+    rdfs:subClassOf     prov:Activity ;
+    rdfs:label          "Experiment"@en ;
+    rdfs:comment        "An experiment run requested from a 5G/6G testbed. Datasets produced by the run are linked to it with prov:wasGeneratedBy; its dct:identifier is the experiment identifier issued with the request, and prov:startedAtTime / prov:endedAtTime give the time the run took place."@en ;
+    rdfs:isDefinedBy    <https://dali-project.eu/ns> .
+
+
 # =============================================================================
 # 2. OBJECT PROPERTIES
 # =============================================================================
