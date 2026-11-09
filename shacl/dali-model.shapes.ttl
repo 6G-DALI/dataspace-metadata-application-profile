@@ -244,6 +244,29 @@ dali:MLModelShape
         sh:message      "mldcat:hyperparameters is recommended."@en ;
     ] ;
 
+    # --- Optional: versioning (previous_version in metadata.json; both properties are written together) ---
+
+    sh:property [
+        sh:path         dcat:previousVersion ;
+        sh:name         "Previous version" ;
+        sh:description  "The model record this version replaces (DCAT 3). Absent for a first version." ;
+        sh:maxCount     1 ;
+        sh:nodeKind     sh:IRI ;
+        sh:class        dcat:Dataset ;
+        sh:severity     sh:Violation ;
+        sh:message      "dcat:previousVersion must be one IRI of an existing model record (a dcat:Dataset)."@en ;
+    ] ;
+
+    sh:property [
+        sh:path         prov:wasRevisionOf ;
+        sh:name         "Was revision of" ;
+        sh:description  "The model record this version is a revision of (PROV-O); same value as dcat:previousVersion." ;
+        sh:nodeKind     sh:IRI ;
+        sh:class        dcat:Dataset ;
+        sh:severity     sh:Violation ;
+        sh:message      "prov:wasRevisionOf must be an IRI of an existing model record (a dcat:Dataset)."@en ;
+    ] ;
+
     # --- Recommended: Provenance ---
 
     sh:property [
