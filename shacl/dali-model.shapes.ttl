@@ -6,9 +6,22 @@
 # This shape targets mldcat:MLModel and covers MLDCAT-AP properties,
 # training provenance, performance metrics via DQV, and 6G-DALI extensions.
 #
+# How a record gets here (ML-Model-Publishing-Guide.md): MLOps upload <uuid>/metadata.json and the model files to the
+# model bucket; the s3-asset-monitor registers the record in the catalogue (the directory name is the record id), then
+# adds one dcat:Distribution per model file as it finds them. So a record has no distribution until its files are
+# found, and the distributions the monitor writes are what dali:MLModelDistributionShape checks. The monitor itself
+# checks the mandatory keys of metadata.json, not these shapes; publish_ml_model.py --dry-run runs them.
+#
 # Severity levels:
 #   sh:Violation  — Mandatory (M)
 #   sh:Warning    — Recommended (R)
+#
+# The shapes for what hangs off a model (its distributions and their checksums, its performance measurements, its
+# training activity) are selected with SPARQL targets (SHACL-AF, so the validator must run with advanced features:
+# pyshacl advanced=True) and not with sh:node: a sh:node constraint fails on any result of the nested shape, warnings
+# included, and would turn a missing recommended field into a violation of the model. With a target, each result keeps
+# its own focus node and severity, and a shape only reaches what is linked from an mldcat:MLModel, never the
+# distributions or measurements of datasets.
 
 PREFIX adms:   <http://www.w3.org/ns/adms#>
 PREFIX dcat:   <http://www.w3.org/ns/dcat#>
@@ -23,6 +36,7 @@ PREFIX schema: <https://schema.org/>
 PREFIX sh:     <http://www.w3.org/ns/shacl#>
 PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
 PREFIX dali:   <https://dali-project.eu/ns#>
+PREFIX spdx:   <http://spdx.org/rdf/terms#>
 
 # ---------------------------------------------------------------------------
 # dali:MLModelShape
@@ -58,6 +72,7 @@ dali:MLModelShape
     sh:property [
         sh:path         dct:identifier ;
         sh:name         "Identifier" ;
+        sh:description  "The record id: the directory the model was uploaded to, and the last segment of the record IRI." ;
         sh:minCount     1 ;
         sh:severity     sh:Violation ;
         sh:message      "dct:identifier is mandatory."@en ;
@@ -78,19 +93,27 @@ dali:MLModelShape
     sh:property [
         sh:path         dct:license ;
         sh:name         "License" ;
+        sh:description  "A licence IRI (metadata.json accepts a code such as MIT or CC-BY-4.0 and expands it), or a dct:LicenseDocument for a licence that has no IRI." ;
         sh:minCount     1 ;
-        sh:nodeKind     sh:IRI ;
+        sh:or (
+            [ sh:nodeKind sh:IRI ]
+            [ sh:class dct:LicenseDocument ]
+        ) ;
         sh:severity     sh:Violation ;
-        sh:message      "dct:license is mandatory."@en ;
+        sh:message      "dct:license is mandatory and must be a licence IRI or a dct:LicenseDocument."@en ;
     ] ;
 
     sh:property [
         sh:path         dct:accessRights ;
         sh:name         "Access rights" ;
+        sh:description  "PUBLIC, RESTRICTED or NON_PUBLIC of the EU Access Right vocabulary (access_rights in metadata.json; PUBLIC when absent)." ;
         sh:minCount     1 ;
         sh:nodeKind     sh:IRI ;
+        sh:in           ( <http://publications.europa.eu/resource/authority/access-right/PUBLIC>
+                          <http://publications.europa.eu/resource/authority/access-right/RESTRICTED>
+                          <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ) ;
         sh:severity     sh:Violation ;
-        sh:message      "dct:accessRights is mandatory."@en ;
+        sh:message      "dct:accessRights is mandatory and must be the EU Access Right PUBLIC, RESTRICTED or NON_PUBLIC."@en ;
     ] ;
 
     sh:property [
@@ -111,14 +134,16 @@ dali:MLModelShape
         sh:message      "adms:version is mandatory for ML models (semantic version recommended, e.g., '1.0.0')."@en ;
     ] ;
 
+    # The model files. The monitor adds them after it has registered the record, so a record has none at first and the
+    # presence is only recommended; what a distribution that is there must carry is mandatory (dali:MLModelDistributionShape).
     sh:property [
         sh:path         dcat:distribution ;
         sh:name         "Distribution" ;
-        sh:description  "Model artefact distribution (weights file, ONNX, container image, etc.)." ;
+        sh:description  "Model artefact distribution (weights file, ONNX, container image, etc.), one per model file." ;
         sh:minCount     1 ;
         sh:nodeKind     sh:BlankNodeOrIRI ;
-        sh:severity     sh:Violation ;
-        sh:message      "dcat:distribution is mandatory for ML models (must reference the model artefact)."@en ;
+        sh:severity     sh:Warning ;
+        sh:message      "dcat:distribution is recommended for ML models: the model files are added as distributions once the monitor has found them."@en ;
     ] ;
 
     # --- Mandatory: MLDCAT-AP specific ---
@@ -326,27 +351,43 @@ dali:MLModelShape
 
 # ---------------------------------------------------------------------------
 # dali:MLModelDistributionShape
-# Additional constraints on dcat:Distribution when used for model artefacts.
-# Applied when the distribution is linked from an mldcat:MLModel.
+# What a dcat:Distribution of an ML model must carry. Selected by a SPARQL target: the distributions linked from an
+# mldcat:MLModel, so those of datasets are not held to it. The s3-asset-monitor writes one per model
+# file with its title, media type, size and checksum, and the connector asset (dali:assetId) the file is registered as.
+#
+# On top of dali:DistributionShape of the base shapes (title, access URL, licence, format), which applies to every
+# dcat:Distribution when the shapes are loaded together.
 # ---------------------------------------------------------------------------
 
 dali:MLModelDistributionShape
     a           sh:NodeShape ;
     sh:name     "6G-DALI ML Model Distribution" ;
+    sh:target [
+        a           sh:SPARQLTarget ;
+        sh:select   """SELECT ?this WHERE { ?model a <http://www.w3.org/ns/mldcat#MLModel> ; <http://www.w3.org/ns/dcat#distribution> ?this . }""" ;
+    ] ;
     sh:description "Shape for dcat:Distribution resources that represent ML model artefact files." ;
 
-    # Inherits from dali:DistributionShape; adds model-specific media type guidance.
-    # Typical model media types: application/onnx, application/zip (TF SavedModel),
-    # application/octet-stream (.pt/.pth), application/xml (PMML),
-    # application/vnd.oci.image.manifest.v1+json (container image).
+    # Model media types (profile section 7.5): application/onnx, application/zip (TF SavedModel),
+    # application/octet-stream (.pt/.pth, pickle, joblib and the other formats), application/xml (PMML),
+    # application/gzip (.tar.gz, .tgz), application/vnd.oci.image.manifest.v1+json (container image).
+
+    sh:property [
+        sh:path     dct:title ;
+        sh:name     "File name" ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message  "dct:title is mandatory on ML model distributions (the file name)."@en ;
+    ] ;
 
     sh:property [
         sh:path     dcat:mediaType ;
         sh:name     "Model media type" ;
         sh:datatype xsd:string ;
         sh:minCount 1 ;
+        sh:pattern  "^[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+$" ;
         sh:severity sh:Violation ;
-        sh:message  "dcat:mediaType is mandatory on ML model distributions."@en ;
+        sh:message  "dcat:mediaType is mandatory on ML model distributions and must be a media type such as application/onnx."@en ;
     ] ;
 
     sh:property [
@@ -355,4 +396,135 @@ dali:MLModelDistributionShape
         sh:minCount 1 ;
         sh:severity sh:Warning ;
         sh:message  "dcat:byteSize is recommended on ML model distributions."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dcat:downloadURL ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Warning ;
+        sh:message  "dcat:downloadURL is recommended on ML model distributions (the file in the Data Lake)."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dali:assetId ;
+        sh:datatype xsd:string ;
+        sh:severity sh:Warning ;
+        sh:message  "dali:assetId is the id of the connector asset the file is registered as, a string."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     spdx:checksum ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:severity sh:Warning ;
+        sh:message  "spdx:checksum must be a spdx:Checksum (dali:MLModelChecksumShape)."@en ;
+    ] .
+
+
+# ---------------------------------------------------------------------------
+# dali:MLModelChecksumShape
+# The checksum of a model file, as the monitor writes it (MD5 of the object).
+# ---------------------------------------------------------------------------
+
+dali:MLModelChecksumShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI ML Model file checksum" ;
+    sh:target [
+        a           sh:SPARQLTarget ;
+        sh:select   """SELECT ?this WHERE { ?model a <http://www.w3.org/ns/mldcat#MLModel> ; <http://www.w3.org/ns/dcat#distribution> ?d . ?d <http://spdx.org/rdf/terms#checksum> ?this . }""" ;
+    ] ;
+
+    sh:property [
+        sh:path     spdx:algorithm ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Warning ;
+        sh:message  "spdx:algorithm is mandatory on a checksum."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     spdx:checksumValue ;
+        sh:minCount 1 ;
+        sh:datatype xsd:hexBinary ;
+        sh:severity sh:Warning ;
+        sh:message  "spdx:checksumValue is mandatory on a checksum and must be xsd:hexBinary."@en ;
+    ] .
+
+
+# ---------------------------------------------------------------------------
+# dali:MLModelMeasurementShape
+# One entry of metrics in metadata.json: a dqv:QualityMeasurement of a metric of the profile
+# (https://dali-project.eu/ns#metric/<name>) with a numeric value, computed on the model.
+# ---------------------------------------------------------------------------
+
+dali:MLModelMeasurementShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI ML Model performance measurement" ;
+    sh:target [
+        a           sh:SPARQLTarget ;
+        sh:select   """SELECT ?this WHERE { ?model a <http://www.w3.org/ns/mldcat#MLModel> ; <http://www.w3.org/ns/dqv#hasQualityMeasurement> ?this . }""" ;
+    ] ;
+
+    sh:property [
+        sh:path     rdf:type ;
+        sh:hasValue dqv:QualityMeasurement ;
+        sh:message  "A performance measurement must be a dqv:QualityMeasurement."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dqv:isMeasurementOf ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:pattern  "^https://dali-project[.]eu/ns#metric/[A-Za-z0-9][A-Za-z0-9._-]*$" ;
+        sh:message  "dqv:isMeasurementOf is mandatory and must be https://dali-project.eu/ns#metric/<name>, with a name of letters, digits, '.', '_' or '-'."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dqv:value ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:message  "dqv:value is mandatory and must be an xsd:decimal."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     dqv:computedOn ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Warning ;
+        sh:message  "dqv:computedOn is recommended (the model the measurement describes)."@en ;
+    ] .
+
+
+# ---------------------------------------------------------------------------
+# dali:MLTrainingActivityShape
+# The training run that produced the model: a prov:Activity with an optional label and start and end times.
+# ---------------------------------------------------------------------------
+
+dali:MLTrainingActivityShape
+    a           sh:NodeShape ;
+    sh:name     "6G-DALI ML Model training activity" ;
+    sh:target [
+        a           sh:SPARQLTarget ;
+        sh:select   """SELECT ?this WHERE { ?model a <http://www.w3.org/ns/mldcat#MLModel> ; <http://www.w3.org/ns/prov#wasGeneratedBy> ?this . }""" ;
+    ] ;
+
+    sh:property [
+        sh:path     rdf:type ;
+        sh:hasValue prov:Activity ;
+        sh:severity sh:Warning ;
+        sh:message  "The training activity must be a prov:Activity."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     prov:startedAtTime ;
+        sh:datatype xsd:dateTime ;
+        sh:severity sh:Warning ;
+        sh:message  "prov:startedAtTime must be an xsd:dateTime."@en ;
+    ] ;
+
+    sh:property [
+        sh:path     prov:endedAtTime ;
+        sh:datatype xsd:dateTime ;
+        sh:severity sh:Warning ;
+        sh:message  "prov:endedAtTime must be an xsd:dateTime."@en ;
     ] .
